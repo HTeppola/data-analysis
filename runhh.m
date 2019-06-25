@@ -25,7 +25,7 @@
 function [spikes,Vrec]=runhh(Ne,M,T,dt,I_mu,I_dev)
 
 if nargin < 1 || isempty(Ne)
-    Ne = 1; %number of excitatory cells
+    Ne = 80; %number of excitatory cells
 end
 
 if nargin < 2 || isempty(M)
@@ -39,7 +39,7 @@ else
 end
 
 if nargin < 3 || isempty(T)
-    T = 1000; %ms
+    T = 100; %ms
 end
 
 if nargin < 4 || isempty(dt)
