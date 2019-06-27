@@ -2,4 +2,4 @@
 
 Cool readme file.
 
-This project uses Matlab.
+This project uses Matlab for data analysis!
