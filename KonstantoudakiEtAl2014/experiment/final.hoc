@@ -1,0 +1,138 @@
+//--------------Set parameters and run this for the net (16 Pcells and 4 Interneurons--> 2PV, 1CB, 1CR)
+//--------------Written 8-5-08, modified 08-10-08
+
+
+load_file("nrngui.hoc")			//load main NEURON library
+cvode.active(0)
+xopen ("net.hoc")                    //load net structure
+strdef syscmd
+strdef data_dir
+data_dir = "data"
+sprint(syscmd, "mkdir -p %s", data_dir)  // make the data directory
+system(syscmd)
+printf("Opened_pcell")
+
+//--------------------------------------------Set parameters
+
+tstop=5000
+steps_per_ms=10
+dt=0.1
+
+
+//-------------------Set synaptic weights
+
+
+ampaweightpr=0.00008	//Initial stimulus 
+ampaweight=0.000065	//according to Wang 2008 
+ampaweightin=0.000085	
+gabaweight=0.00083	 
+gabaweightb=gabaweight*0.35	//ratio gabab to gabaa 0.2	
+
+
+autogabaweight=0.0073*0.75	//According to Bacci (2003)
+
+nmdaweight=ampaweight*21.5	//according to wang et al, 2008
+
+nmdaweightin=ampaweightin*0.52  //according to wang and gao, Neuropharmacology
+
+ampaweightcb=0.000029			
+nmdaweightcb=ampaweightcb*0.86		
+
+ampaweightcr=0.000046			//20pA sta -72 --> 28/05/2010	
+nmdaweightcr=ampaweightcr*2.2		
+
+gabaweightcrcb=0.0083*0.25              	//cr-cb connections 
+
+gabaweightcb=0.0006*1.5                  	//cb-pc connections 
+
+gabaweightcr=0.00087*3                 	//cr-pc connections 
+
+
+
+
+
+//-------------------Set # of synapses
+
+inmaxsyn=120              		//initial stimulation
+maxsyn=24	                   	//PC-PC connections
+automaxsyn=8                		//autosynapses 
+maxsyn1=1                    		//IN-IN connections
+maxsyn2=12                		//PC-IN connections 
+maxsyn3=15                  		 //IN-PC soma connections
+maxsyn4=15				//IN-PC dend1 connections 
+maxsyn5=14				//PC-CB connections 
+maxsyn6=7				//PC-CR connections 
+maxsyn7=2				//CR-CB connections 
+maxsyn8=12				//CB-PC connections
+maxsyn9=10				//CR-PC connections 
+
+///------------------------------------Pharmacological procedures
+proc sadp_soma() {
+forsec soma_list{
+for(x) {
+	fi2=0	//factor for ican
+	if(ismembrane("ican")) for(x) { gbar_ican(x)= gbar_ican(x)*fi2 } 
+	}}
+}
+proc sadp_dend() {
+forsec dend_list{
+for(x) {
+	fi2=0	//factor for ican
+	if(ismembrane("ican")) for(x) { gbar_ican(x)= gbar_ican(x)*fi2 } 
+	}}
+}
+
+
+//--------------------------------------Graphs
+xopen("../bash_templates/basic-graphics.hoc") 	
+addgraph_2("Pcells[0].soma.v(0.5)",0,tstop, -70, 50)
+addgraph_2("INcells[0].soma.v(0.5)",0,tstop, -70, 50)
+addgraph_2("CBcells[0].soma.v(0.5)",0,tstop, -70, 50)
+addgraph_2("CRcells[0].soma.v(0.5)",0,tstop, -70, 50)
+
+
+
+//-------------------------------------------------------Multiple Runs----------------------------------//
+strdef syscmd, data_dir, running, tmpstr
+//-----Variables
+n=int(tstop/dt)
+//-----Objects for record data
+objref cv
+cv=new CVode(0)
+objref PCv[nPcells], PCt[nPcells], INv[nINcells], INt[nINcells], CBv[nCBcells], CBt[nCBcells], CRv[nCRcells], CRt[nCRcells]
+strdef temp
+objref vsoma1, vsoma2, vsoma3, vsoma4, vsoma5, vsoma6, vsoma7, vsoma8, vsoma9, vsoma10, vsoma11, vsoma12, vsoma13, vsoma14, vsoma15, vsoma16, insoma1, insoma2, cbsoma, crsoma, curampa, curnmda, curgabaa, curgabab
+objref campa[maxsyn+automaxsyn], campat[maxsyn+automaxsyn], cnmda[maxsyn+automaxsyn], cnmdat[maxsyn+automaxsyn], cgabaa[maxsyn3], cgabaat[maxsyn3], cgabab[maxsyn3], cgababt[maxsyn3], ampac, nmdac, gabaac, gababc	
+
+
+// to reinstate for loop: comment the runs=0 and the xpanel and
+// uncomment the for statement below, the run command and the close
+// curly paranethesis at the bottom
+//
+// for runs = 0, 0 {
+runs=0 // comment this line out to reinstate for loop
+//--------------------------------------Call procedures
+stimulation(runs)
+pyramidals(runs)
+interneurons(runs)
+pyrin(runs)
+inpyr(runs)
+//inpyrs(runs) DO NOT ACTIVATE!!!
+pyrcb(runs)
+pyrcr(runs)
+crcb(runs)
+cbpyr(runs)
+crpyr(runs)
+noise(runs)
+sadp_soma()
+print runs
+
+//-------------------------------------Record data
+
+// comment xpanel and uncomment run command below to reinstate for loop:
+xpanel("Konstantoudaki et al. 2014")
+    xbutton("run","run()")
+xpanel()
+// run() // remove the comments from these lines to reinstate for loop
+// 
+//}

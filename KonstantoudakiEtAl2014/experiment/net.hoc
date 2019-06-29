@@ -1,0 +1,510 @@
+/* Based on Durstewitz and Gabriel 2006, "Irregular spiking in NMDA-driven prefrontal cortex neurons"
+Written 18-04-08 updated 8-10-2009
+This file makes connections between 16 Pcells, 2 PV and 1 CB interneuron and 1 CR interneuron. The connections are all-with-all, with the same weights for feedforward and feedback synapses, but with different for autapses. Also the number of synapses Pcells to interneuon and interneuron to Pcells are different*/ 
+
+
+
+xopen ("incell.hoc")      		//load template for PV/FS interneuron
+xopen ("pfc_pc_temp.hoc")		//load template for pyramidal neuron
+xopen ("cb.hoc")			//load template for CB/LTS interneuron
+xopen ("cr.hoc")		//load template for CR/IR interneuron
+
+
+//----------------------------Insert variables to be used for stimulations and connections
+
+//----------------------------Insert variable for random placement of synapses
+
+objref r, f, fin, fpin, finp, finps, fpcb, fpcr, fcrcb, fcbp, fcrp, fa, fn
+
+
+
+//--------------------Stimulations
+
+total=150
+objref nc1[nPcells][total], ns1, nc2[nPcells][total], ampapr[nPcells][total], nmdapr[nPcells][total], nc3[nPcells][total], ns2, nc4[nPcells][total], ampal[nPcells][total], nmdal[nPcells][total], gabaal[nPcells][total], gababl[nPcells][total]
+
+
+
+//--------------------PC-PC connections
+objref autoampa[nPcells][total], autonmda[nPcells][total]                          //autapses
+objref conautoampa[nPcells][total], conautonmda[nPcells][total]
+objref ampa[nPcells][total], nmda[nPcells][total]                                 //synapses  
+objref conampa[nPcells][nPcells][total], connmda[nPcells][nPcells][total]
+
+//--------------------IN-IN connections
+objref gabaain[nINcells][total],gababin[nINcells][total]
+objref congabaain[nINcells][nINcells][total],congababin[nINcells][nINcells][total]
+
+//--------------------PC-IN connections
+objref ampain[nINcells][total], nmdain[nINcells][total]
+objref conampain[nPcells][nINcells][total], connmdain[nPcells][nINcells][total]
+
+//--------------------IN-PC connections-soma
+objref gabaa[nPcells][total],gabab[nPcells][total]
+objref congabaa[nINcells][nPcells][total], congabab[nINcells][nPcells][total]
+
+//--------------------IN-PC connections-dend1
+objref gabaas[nPcells][total],gababs[nPcells][total]
+objref congabaas[nINcells][nPcells][total], congababs[nINcells][nPcells][total]
+
+//--------------------PC-CB connections
+objref ampacb[nCBcells][total], nmdacb[nCBcells][total]
+objref conampacb[nPcells][nCBcells][total], connmdacb[nPcells][nCBcells][total]
+
+//--------------------PC-CR connections
+objref ampacr[nCRcells][total], nmdacr[nCRcells][total]
+objref conampacr[nPcells][nCRcells][total], connmdacr[nPcells][nCRcells][total]
+
+//--------------------CR-CB connections
+objref gabaacrcb[nCBcells][total],gababcrcb[nCBcells][total]
+objref congabaacrcb[nCRcells][nCBcells][total],congababcrcb[nCRcells][nCBcells][total]
+
+//--------------------CB-PC connections
+objref gabaacb[nPcells][total],gababcb[nPcells][total]
+objref congabaacb[nCBcells][nPcells][total], congababcb[nCBcells][nPcells][total]
+
+//--------------------CR-PC connections
+objref gabaacrs[nPcells][total],gababcrs[nPcells][total]
+objref congabaacrs[nCRcells][nPcells][total], congababcrs[nCRcells][nPcells][total]
+
+
+
+
+
+//--------------------Others 
+objref ic1, ic2, ic3, ic4, ic5, ic6, ic7, ic8, ic9, ic10                    	//IClamp
+objref sinw[nPcells], w[101][nPcells], ramp              				//membrane noise
+objref insinw[nINcells], inw[101][nINcells], ramp
+objref cbsinw[nCBcells], cbw[101][nCBcells], ramp
+objref crsinw[nCRcells], crw[101][nCRcells], ramp
+
+//----------------------------------------------Insert noise
+
+proc noise() {
+tot=0
+forsec soma_list {
+w[runs][tot]=new Random(tot+$1)
+w[runs][tot].poisson(0.02) 
+    
+sinw[tot]=new SinClamp(0.5)
+sinw[tot].del=0       
+sinw[tot].dur=tstop
+sinw[tot].freq =100     
+w[runs][tot].play(&sinw[tot].pkamp)
+tot=tot+1
+} 
+
+totin=0
+forsec insoma_list {
+inw[runs][totin]=new Random(1000+$1)
+inw[runs][totin].poisson(0.02)  
+
+insinw[totin]=new SinClamp(0.5)
+insinw[totin].del=0      
+insinw[totin].dur=tstop
+insinw[totin].freq =100 
+   
+inw[runs][totin].play(&insinw[totin].pkamp)
+totin=totin+1
+} 
+
+totcb=0
+forsec cbsoma_list {
+cbw[runs][totcb]=new Random(800+$1)
+cbw[runs][totcb].poisson(0.02)  
+
+cbsinw[totcb]=new SinClamp(0.5)
+cbsinw[totcb].del=0      
+cbsinw[totcb].dur=tstop
+cbsinw[totcb].freq =100 
+   
+cbw[runs][totcb].play(&cbsinw[totcb].pkamp)
+totcb=totcb+1
+} 
+
+totcr=0
+forsec crsoma_list {
+crw[runs][totcr]=new Random(1500+$1)
+crw[runs][totcr].poisson(0.035)  
+
+crsinw[totcr]=new SinClamp(0.5)
+crsinw[totcr].del=0      
+crsinw[totcr].dur=tstop
+crsinw[totcr].freq =100 
+   
+crw[runs][totcr].play(&crsinw[totcr].pkamp)
+totcr=totcr+1
+} 
+}
+
+//---------------------------Initial stimulation (proximal dendrite)(Kuroda, 1998, Constantinides, 2001)
+
+ns1=new NetStim(0.5)
+ns1.interval=50 
+ns1.number=10
+ns1.start=0
+ns1.noise=0
+
+proc stimulation() {
+
+r = new Random($1+165)
+PID = r.uniform(0, 1)
+
+for i=0, (nPcells-1) {
+	for j=0, (inmaxsyn-1) {
+PID=r.repick()
+Pcells[i].dend[1] ampapr[i][j]=new GLU(PID)
+Pcells[i].dend[1] nmdapr[i][j]=new NMDA(PID)
+
+nc1[i][j]=new NetCon(ns1, ampapr[i][j])
+nc1[i][j].delay=500
+nc1[i][j].weight=ampaweightpr 
+nc1[i][j].threshold=-20 
+	
+nc2[i][j]=new NetCon(ns1, nmdapr[i][j])
+nc2[i][j].delay=500
+nc2[i][j].weight=ampaweightpr*5                        
+nc2[i][j].threshold=-20 
+		
+		}
+
+	}
+
+}
+
+// --------------------------------PC-PC connections, basal dendrite(Thomson, 1997)
+
+proc pyramidals() {
+fa = new Random($1+3)
+//FIDa=fa.normal(1.5,0.15)			//According to Thomson(2007)
+FIDa=fa.normal(0.96,0.11)
+fn=new Random($1+124)
+FIDn=fn.normal(1.33, 0.13)
+
+//---------------------------------------------------Insert Autapses(Lubke, 1996)
+for i=0, (nPcells-1) {
+	for j=0, (automaxsyn-1) {
+
+//PID=r.repick()
+
+Pcells[i].dend[0] autoampa[i][j] = new GLU(0.5)
+Pcells[i].dend[0] autonmda[i][j] = new NMDA(0.5)
+	}
+}
+//----------------------Connect autapses
+for i=0, (nPcells-1) {
+	for j=0, (automaxsyn-1) {
+
+FIDa=fa.repick()
+if (FIDa<0) FIDa=FIDa*(-1)
+FIDn=fn.repick()
+if (FIDn<0) FIDn=FIDn*(-1)
+
+Pcells[i].axon conautoampa [i][j] = new NetCon(&v(1), autoampa[i][j], -20, FIDa, ampaweight)
+Pcells[i].axon conautonmda [i][j] = new NetCon(&v(1), autonmda[i][j], -20, FIDn, nmdaweight) 
+	}
+}
+//---------------------------------------------------------Insert Synapses
+ 
+//The connections between Pcells are all-with-all, with the same strength (#of synapses)
+
+for i=0, (nPcells-1) {
+	for j=0, (maxsyn-1) {
+
+//PID=r.repick()
+
+Pcells[i].dend[0] ampa[i][j] = new GLU(0.5)
+Pcells[i].dend[0] nmda[i][j] = new NMDA(0.5)
+	}
+}
+
+///---------------------Connect synapses
+for i=0, (nPcells-1) {
+	for j=0, (nPcells-1) {
+			if (i !=j) {
+				for k=0, (maxsyn-1) {
+//FID=f.repick()
+//if (FID<0) FID=FID*(-1)
+FIDa=fa.repick()
+if (FIDa<0) FIDa=FIDa*(-1)
+FIDn=fn.repick()
+if (FIDn<0) FIDn=FIDn*(-1)
+
+Pcells[i].axon conampa[i][j][k]=new NetCon(&v(1), ampa[j][k], -20, FIDa, ampaweight)
+Pcells[i].axon connmda[i][j][k]=new NetCon(&v(1), nmda[j][k], -20, FIDn, nmdaweight)
+			}
+		}
+	}
+}
+
+}
+
+///---------------------------------------------IN-IN connections--------------------------------------------------------//
+proc interneurons() {
+fin = new Random($1-100)
+delstimin=fin.normal(1.76,0.07)		//latency from IN-IN, according to Bacci (2003)   
+//delstimin=1.8
+// delstimin=0.5
+//----------------------Insert synapses
+
+for i=0, (nINcells-1) {
+	for j=0,(maxsyn1-1) {
+
+//PID = r.repick ()
+
+INcells[i].soma gabaain[i][j] = new GABAain(0.5)
+	}
+}
+//----------------------Connect
+for i=0, (nINcells-1) {
+	for j=0, (nINcells-1) {
+		for k=0, (maxsyn1-1) {
+
+
+delstimin=fin.repick()
+if (delstimin<0) delstimin=delstimin*(-1)
+
+INcells[i].axon congabaain[i][j][k] = new NetCon(&v(1), gabaain[j][k],-20,delstimin,autogabaweight)
+		}
+	}
+}
+
+}
+
+//----------------------------------------------PC-IN connections-------------------------------------------------------//
+proc pyrin() {
+fpin = new Random($1*2)
+delstim=fpin.normal(0.6, 0.2)		
+//delstim=0.6
+//----------------------------------Insert synapses
+
+for i=0, (nINcells-1) {
+       for j=0, (maxsyn2-1) {
+
+INcells[i].dend ampain[i][j] = new GLUIN(0.5)
+INcells[i].dend nmdain[i][j] = new NMDAIN(0.5)
+    }
+}
+//-----------------------------------Connect
+for i=0, (nPcells-1) {
+	for j=0, (nINcells-1) {
+		for k=0, (maxsyn2-1) {
+
+delstim=fpin.repick()
+if (delstim<0) delstim=delstim*(-1)
+
+Pcells[i].axon conampain[i][j][k] = new NetCon(&v(1), ampain[j][k], -20, delstim, ampaweightin)
+Pcells[i].axon connmdain[i][j][k] = new NetCon(&v(1), nmdain[j][k], -20, delstim, nmdaweightin)   
+		}
+	}
+}
+
+}
+//------------------------------------------------IN-PC connections-----------------------------------------------------//
+proc inpyr() {
+finp = new Random($1*8)
+delstiminp=finp.normal(1.8, 0.8)	//latency from IN-Pc, according to Thomson(2007)
+//delstiminp=1.8
+//----------------------------Insert synapses
+for i=0, (nPcells-1) {
+	for j=0,(maxsyn3-1) { 
+
+Pcells[i].soma gabaa[i][j] = new GABAa(0.5)
+Pcells[i].soma gabab[i][j] = new GABAb(0.5)
+	}
+}
+//-----------------------------Connect
+for i=0, (nINcells-1) {
+	for j=0,(nPcells-1) {
+		for k=0, (maxsyn3-1) {
+
+delstiminp=finp.repick()
+if (delstiminp<0) delstiminp=delstiminp*(-1)
+
+INcells[i].axon congabaa[i][j][k] = new NetCon(&v(1), gabaa[j][k], -20, delstiminp, gabaweight)
+INcells[i].axon congabab[i][j][k] = new NetCon(&v(1), gabab[j][k], -20, delstiminp, gabaweightb)
+		}
+	}
+}
+
+}
+
+
+//-----------------------------------------------IN-PC connections-dend1
+
+proc inpyrs() {
+finp = new Random($1*8)
+delstiminp=finp.normal(1.8, 0.8)	//latency from IN-Pc, according to Thomson(2007)
+//delstiminp=1.8
+//----------------------------Insert synapses
+for i=0, (nPcells-1) {
+	for j=0,(maxsyn3-1) { 
+
+Pcells[i].dend[1] gabaas[i][j] = new GABAa(0.5)
+Pcells[i].dend[1] gababs[i][j] = new GABAb(0.5)
+	}
+}
+//-----------------------------Connect
+for i=0, (nINcells-1) {
+	for j=0,(nPcells-1) {
+		for k=0, (maxsyn3-1) {
+
+delstiminp=finp.repick()
+if (delstiminp<0) delstiminp=delstiminp*(-1)
+
+INcells[i].axon congabaas[i][j][k] = new NetCon(&v(1), gabaas[j][k], -20, delstiminp, gabaweight)
+INcells[i].axon congababs[i][j][k] = new NetCon(&v(1), gababs[j][k], -20, delstiminp, gabaweightb)
+		}
+	}
+}
+
+}
+
+
+
+//----------------------------------------------PC-CB connections-------------------------------------------------------//
+proc pyrcb() {
+fpcb = new Random($1*2)
+delstim=fpcb.normal(0.6, 0.2)		//latency from Pc-Cb, according to Thomson(2007), also Angulo,Audinat(1999)
+//delstim=0.6
+//----------------------------------Insert synapses
+
+for i=0, (nCBcells-1) {
+       for j=0, (maxsyn5-1) {
+
+CBcells[i].dend ampacb[i][j] = new GLUIN(0.5)
+CBcells[i].dend nmdacb[i][j] = new NMDA(0.5)
+    }
+}
+//-----------------------------------Connect
+for i=0, (nPcells-1) {
+	for j=0, (nCBcells-1) {
+		for k=0, (maxsyn5-1) {
+
+delstim=fpcb.repick()
+if (delstim<0) delstim=delstim*(-1)
+
+Pcells[i].axon conampacb[i][j][k] = new NetCon(&v(1), ampacb[j][k], -20, delstim, ampaweightcb)
+Pcells[i].axon connmdacb[i][j][k] = new NetCon(&v(1), nmdacb[j][k], -20, delstim, nmdaweightcb)   
+		}
+	}
+}
+
+}
+
+
+
+//----------------------------------------------PC-CR connections-------------------------------------------------------//
+proc pyrcr() {
+fpcr = new Random($1*2)
+delstim=fpcr.normal(0.6, 0.2)		
+//----------------------------------Insert synapses
+
+for i=0, (nCRcells-1) {
+       for j=0, (maxsyn6-1) {
+
+CRcells[i].dend[0] ampacr[i][j] = new GLUIN(0.5)
+CRcells[i].dend[0] nmdacr[i][j] = new NMDA(0.5)
+    }
+}
+//-----------------------------------Connect
+for i=0, (nPcells-1) {
+	for j=0, (nCRcells-1) {
+		for k=0, (maxsyn6-1) {
+
+delstim=fpcr.repick()
+if (delstim<0) delstim=delstim*(-1)
+
+Pcells[i].axon conampacr[i][j][k] = new NetCon(&v(1), ampacr[j][k], -20, delstim, ampaweightcr)
+Pcells[i].axon connmdacr[i][j][k] = new NetCon(&v(1), nmdacr[j][k], -20, delstim, nmdaweightcr)   
+		}
+	}
+}
+
+}
+
+
+//------------------------------------------------CR-CB connections-----------------------------------------------------//
+proc crcb() {
+fcrcb = new Random($1*9)
+delstimcrcb=fcrcb.normal(1.8, 0.8)	
+//delstimcbp=1.8
+//----------------------------Insert synapses
+for i=0, (nCBcells-1) {
+	for j=0,(maxsyn7-1) { 
+
+//PID = r.repick()
+//print delstimcbp
+CBcells[i].dend gabaacrcb[i][j] = new GABAa(0.5)
+
+	}
+}
+//-----------------------------Connect
+for i=0, (nCRcells-1) {
+	for j=0,(nCBcells-1) {
+		for k=0, (maxsyn7-1) {
+
+delstimcrcb=fcrcb.repick()
+if (delstimcrcb<0) delstimcrcb=delstimcrcb*(-1)
+
+CRcells[i].axon congabaacrcb[i][j][k] = new NetCon(&v(1), gabaacrcb[j][k], -20, delstimcrcb, gabaweightcrcb)
+		}
+	}
+}
+
+}
+
+//------------------------------------------------CB-PC connections-----------------------------------------------------//
+proc cbpyr() {
+fcbp = new Random($1*9)
+delstimcbp=fcbp.normal(1.8, 0.8)	
+
+//----------------------------Insert synapses
+for i=0, (nPcells-1) {
+	for j=0,(maxsyn8-1) { 
+
+Pcells[i].dend[2] gabaacb[i][j] = new GABAa(0.5)
+	}
+}
+//-----------------------------Connect
+for i=0, (nCBcells-1) {
+	for j=0,(nPcells-1) {
+		for k=0, (maxsyn8-1) {
+
+delstimcbp=fcbp.repick()
+if (delstimcbp<0) delstimcbp=delstimcbp*(-1)
+
+CBcells[i].axon congabaacb[i][j][k] = new NetCon(&v(1), gabaacb[j][k], -20, delstimcbp, gabaweightcb)
+		}
+	}
+}
+
+}
+
+
+//------------------------------------------------CR-PC connections-----------------------------------------------------//
+proc crpyr() {
+fcrp = new Random($1*9)
+delstimcrp=fcrp.normal(1.8, 0.8)	
+
+//----------------------------Insert synapses
+for i=0, (nPcells-1) {
+	for j=0,(maxsyn9-1) { 
+
+Pcells[i].dend[2] gabaacrs[i][j] = new GABAa(0.5)
+	}
+}
+//-----------------------------Connect
+for i=0, (nCRcells-1) {
+	for j=0,(nPcells-1) {
+		for k=0, (maxsyn9-1) {
+
+delstimcrp=fcrp.repick()
+if (delstimcrp<0) delstimcrp=delstimcrp*(-1)
+
+CRcells[i].axon congabaacrs[i][j][k] = new NetCon(&v(1), gabaacrs[j][k], -20, delstimcrp, gabaweightcr)
+		}
+	}
+}
+
+}

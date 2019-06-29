@@ -1,0 +1,142 @@
+//Interneuron for PFC - fast spiking parvalbumin interneuron 
+//Based on Durstewitz and Gabriel 2006
+//"Irregular spiking in NMDA-driven prefrontal cortex neurons"
+
+
+begintemplate INcell
+
+public soma, axon, dend
+
+create soma, axon, dend
+
+
+proc init () {
+
+create soma, axon, dend
+
+soma_nafin=0.045  
+soma_kdrin=0.018  
+soma_Kslowin=0.000725*0.1
+soma_hin=0.00001
+soma_kapin=0.0032*15  
+soma_canin=0.0003
+soma_kctin=0.0001
+
+soma {
+     nseg=1
+     L=27
+     diam=29
+
+	insert pas
+	cm=1.2            //microF/cm2
+	g_pas =1/10000    //mho/cm2   
+	e_pas = v_initin   //(Kawaguchi k Kubota, 1993 --> -73+-3.9)
+	v_initin= -73
+	Ra=150 
+
+     insert Nafx
+     gnafbar_Nafx= soma_nafin
+
+     insert kdrin
+     gkdrbar_kdrin= soma_kdrin
+
+     insert IKsin	
+     gKsbar_IKsin= soma_Kslowin
+
+     insert hin
+     gbar_hin=soma_hin
+
+     insert kapin
+     gkabar_kapin=soma_kapin
+
+     insert canin
+     gcalbar_canin=soma_canin
+
+     insert kctin
+     gkcbar_kctin=soma_kctin
+
+     insert cadynin
+
+}
+
+axon {
+	nseg=1
+	L=115
+	diam=1.5
+	
+	insert pas
+	cm=1.2            //microF/cm2
+	g_pas =1/10000  //mho/cm2   
+	e_pas = v_initin
+	v_initin= -73
+	Ra=150 
+
+	insert Nafx
+	gnafbar_Nafx=soma_nafin*10 
+
+	insert kdrin
+	gkdrbar_kdrin=soma_kdrin*0.5
+}
+
+
+dend {
+	nseg=1
+	L=22
+	diam=7
+
+
+	insert pas
+	cm=1.2            //microF/cm2
+	g_pas =1/10000    //mho/cm2   
+	e_pas = v_initin//(Kawaguchi k Kubota, 1993 --> -73+-3.9)
+	v_initin= -73
+	Ra=150
+
+	insert Nafx
+	gnafbar_Nafx=0.018*5
+
+	insert kdrin
+	gkdrbar_kdrin=0.018*0.5
+
+     	insert kapin
+    	gkabar_kapin=soma_kapin*10
+
+}
+
+	ko0_k_ion = 3.82   //mM
+ 	ki0_k_ion = 140    //mM
+	celsius   = 23
+	connect axon(0), soma(0.5)
+	connect dend(0), soma(0)  
+}
+
+init()
+
+endtemplate INcell
+
+//Creating new interneurons
+
+nINcells = 2
+objref INcells[nINcells]
+
+for i = 0, nINcells-1 {
+INcells[i] = new INcell()
+}
+
+//Create list with segments
+objref insoma_list, incell_list
+
+insoma_list = new SectionList()
+for i=0, nINcells-1 {
+INcells[i].soma insoma_list.append()
+}
+
+incell_list = new SectionList()
+for i=0, nINcells-1 {
+INcells[i].soma incell_list.append()
+INcells[i].axon incell_list.append()
+INcells[i].dend incell_list.append()
+}
+
+xopen("../bash_templates/current-balancein.hoc")
+current_balancein(-73)  

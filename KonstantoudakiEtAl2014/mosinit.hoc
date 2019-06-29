@@ -1,0 +1,4 @@
+//moddir experiment
+load_file("nrngui.hoc")
+chdir("experiment")
+load_file("final.hoc")

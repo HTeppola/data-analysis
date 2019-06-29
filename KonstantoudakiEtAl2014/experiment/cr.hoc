@@ -1,0 +1,163 @@
+//"Irregular spiking in NMDA-driven prefrontal cortex neurons"
+//Written 25-10-07 by Xenia Konstantoudaki
+//Based on Toledo-Rodriguez, 2004 (SK2, Kv3.4, Caa1B)
+
+
+begintemplate CRcell
+
+public soma, axon, dend
+
+create soma, axon, dend[2]
+
+
+
+proc init () {
+
+create soma, axon, dend[2]
+
+soma_nafcr=0.015
+soma_kdrcr=0.018 
+soma_Kslowcr=0.000725
+soma_iCcr=0.00003
+soma_kadcr=0.003
+soma_cancr=0.001
+
+soma {
+     nseg=1
+     L=27
+     diam=27
+
+	insert pas
+	cm=1.2            //microF/cm2
+	g_pas =1/20000
+	e_pas = v_initcr
+	v_initcr= -70
+	Ra=150 
+
+
+
+     insert Nafcr
+     gnafbar_Nafcr= soma_nafcr
+
+     insert kdrcr
+     gkdrbar_kdrcr= soma_kdrcr
+
+     insert IKscr
+     gKsbar_IKscr= soma_Kslowcr
+
+     insert iCcr
+     gkcbar_iCcr= soma_iCcr
+
+     insert kadcr
+     gkabar_kadcr= soma_kadcr
+
+     insert cancr
+     gcatbar_cancr=soma_cancr
+
+     insert cadyn
+}
+
+axon {
+	nseg=1
+	L=113.22
+	diam=1.1
+
+
+	insert pas
+	cm=1.2            //microF/cm2
+	g_pas =1/20000
+	e_pas = v_initcr
+	v_initcr= -70
+	Ra=150 
+	
+	insert Nafcr
+	gnafbar_Nafcr= soma_nafcr*10
+
+	insert kdrcr
+	gkdrbar_kdrcr= soma_kdrcr*0.5
+}
+
+dend[0] {
+	nseg=1
+	L=22
+	diam=7
+
+	
+	insert pas
+	cm=1.2            //microF/cm2
+	g_pas =1/20000
+	e_pas = v_initcr
+	v_initcr= -70
+	Ra=150 
+
+	insert Nafcr
+	gnafbar_Nafcr=0.018*5
+
+	insert kdrcr
+	gkdrbar_kdrcr=0.018*0.5
+}
+
+dend[1] {
+	nseg=1
+	L=22
+	diam=7
+
+	
+	insert pas
+	cm=1.2            //microF/cm2
+	g_pas =1/20000
+	e_pas = v_initcr
+	v_initcr= -70
+	Ra=150 
+
+	insert Nafcr
+	gnafbar_Nafcr=0.018*5
+
+	insert kdrcr
+	gkdrbar_kdrcr=0.018*0.5
+}
+
+
+	ko0_k_ion = 3.82   //mM
+ 	ki0_k_ion = 140    //mM
+	celsius   = 23
+
+	connect dend[0](0), soma(0)
+	connect dend[1](0), soma(1)
+	connect axon(0), soma(0.5)
+	
+   
+}
+
+init()
+
+endtemplate CRcell
+
+//Creating new interneurons
+
+nCRcells = 1
+objref CRcells[nCRcells]
+
+for i = 0, nCRcells-1 {
+CRcells[i] = new CRcell()
+}
+
+//Create list with segments
+objref crsoma_list, crcell_list
+
+crsoma_list = new SectionList()
+for i=0, nCRcells-1 {
+CRcells[i].soma crsoma_list.append()
+}
+
+crcell_list = new SectionList()
+for i=0, nCRcells-1 {
+CRcells[i].soma crcell_list.append()
+CRcells[i].axon crcell_list.append()
+CRcells[i].dend[0] crcell_list.append()
+CRcells[i].dend[1] crcell_list.append()
+}
+
+
+xopen("../bash_templates/current-balancecr.hoc")
+current_balancecr(-70)  

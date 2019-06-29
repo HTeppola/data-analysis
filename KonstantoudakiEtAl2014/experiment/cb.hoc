@@ -1,0 +1,133 @@
+//Interneuron for PFC - Calbindin/LTS interneuron
+//Written 25-10-2007 by Xenia Konstantoudaki
+
+
+begintemplate CBcell
+
+public soma, axon, dend
+
+create soma, axon, dend
+
+proc init () {
+
+create soma, axon, dend
+
+soma_nafcb=0.075 
+soma_kdrcb=0.018 
+soma_hcb=0.000002 
+soma_kapcb=0.007*5
+soma_catcb=0.003 
+
+soma {
+     nseg=1
+     L=42 
+     diam=42 
+
+	insert pas
+	cm=1.2            //microF/cm2
+	g_pas =1/40000
+	e_pas = v_initcb
+	v_initcb= -64
+	Ra=150 
+
+
+
+     insert Nafx
+     gnafbar_Nafx= soma_nafcb
+
+     insert kdrcb 
+     gkdrbar_kdrcb= soma_kdrcb
+
+     insert hcb
+     gbar_hcb= soma_hcb
+
+     insert kapcb
+     gkabar_kapcb= soma_kapcb
+
+     insert catcb
+     gcatbar_catcb=soma_catcb
+
+     insert cadyn
+}
+
+axon {
+	nseg=1
+	L=113.22 
+	diam=1.1
+	insert pas
+	cm=1.2            //microF/cm2
+	g_pas =1/40000
+	e_pas = v_initcb
+	v_initcb= -64
+	Ra=150 
+	
+	insert Nafx
+	gnafbar_Nafx= soma_nafcb*10
+
+	insert kdrcb
+	gkdrbar_kdrcb= soma_kdrcb*0.5
+}
+
+dend {
+	nseg=1
+	L=22
+	diam=7
+
+
+	insert pas
+	cm=1.2            //microF/cm2
+	g_pas =1/40000
+	e_pas = v_initcb
+	v_initcb= -64
+	Ra=150 
+	
+	insert Nafx
+	gnafbar_Nafx=0.018
+
+	insert kdrcb
+	gkdrbar_kdrcb=0.018*0.5
+
+  	insert kapcb
+     	gkabar_kapcb=0.00875
+
+
+}
+
+	ko0_k_ion = 3.82   //mM
+ 	ki0_k_ion = 140    //mM
+	celsius   = 23
+	connect axon(0), soma(0.5)
+	connect dend(0), soma(0)
+}
+
+init()
+
+endtemplate CBcell
+
+//Creating new interneurons
+
+nCBcells = 1
+objref CBcells[nCBcells]
+
+for i = 0, nCBcells-1 {
+CBcells[i] = new CBcell()
+}
+
+//Create list with segments
+objref cbsoma_list, cbcell_list
+
+cbsoma_list = new SectionList()
+for i=0, nCBcells-1 {
+CBcells[i].soma cbsoma_list.append()
+}
+
+cbcell_list = new SectionList()
+for i=0, nCBcells-1 {
+CBcells[i].soma cbcell_list.append()
+CBcells[i].axon cbcell_list.append()
+CBcells[i].dend cbcell_list.append()
+}
+
+
+xopen("../bash_templates/current-balancecb.hoc")
+current_balancecb(-64)  
