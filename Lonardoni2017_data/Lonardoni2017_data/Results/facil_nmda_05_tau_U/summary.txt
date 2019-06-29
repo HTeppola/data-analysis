@@ -1,0 +1,7 @@
+Simulation of 983 neurons over 101 (s)
+Graph: 4fNEW_graph-all_AMPA_test_1.0_0.005_983_0  imported from /Topologies
+Percentage of inh neurons: 0.2
+Exc syn strength: 36.0
+Inh syn strength: 36.0
+Noise strength: 16
+Spontaneous activity
