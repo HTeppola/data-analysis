@@ -12,9 +12,9 @@ def graph_partition(H, showplot=0, itera=10):
     G, mapping = nx_to_igraph(h, pos_flag=1)
     wc = G.community_infomap(trials=itera)
     groups = partition(wc)
-    i_mapping = dict(zip(mapping.values(), mapping.keys()))
+    i_mapping = dict(list(zip(list(mapping.values()), list(mapping.keys()))))
     for ele in groups:
-        for i in xrange(len(ele)):
+        for i in range(len(ele)):
             ele[i] = i_mapping[ele[i]]
     if showplot:
         plot_graph(wc)
@@ -101,8 +101,8 @@ def nx_to_igraph(H, pos_flag=1, direction=True):
         if pos == {}:
             pos = nx.spring_layout(G)
 
-        g.vs['x'] = [ele[0] for ele in pos.values()]
-        g.vs['y'] = [ele[1] for ele in pos.values()]
+        g.vs['x'] = [ele[0] for ele in list(pos.values())]
+        g.vs['y'] = [ele[1] for ele in list(pos.values())]
     return g, mapping
 
 
@@ -133,7 +133,7 @@ def plot_graph(wc):
     except:
         tmp = wc
     comm = np.array(tmp.membership)
-    print tmp.summary()
+    print(tmp.summary())
     fig = ig.plot(tmp, vertex_size=5, mark_groups=pairs(comm))
     return fig
 
@@ -146,10 +146,10 @@ def all_common(G, groups, pivot=-1):
 
     GU = G
     if pivot < 0:
-        for i in xrange(1, len(groups)):
-            for j in xrange(i + 1, len(groups)):
-                print "group\t %s\t vs\t %s:" % (i, j)
-                print "nodes\t %s\t vs\t %s:" % (len(groups[-i]), len(groups[-j]))
+        for i in range(1, len(groups)):
+            for j in range(i + 1, len(groups)):
+                print("group\t %s\t vs\t %s:" % (i, j))
+                print("nodes\t %s\t vs\t %s:" % (len(groups[-i]), len(groups[-j])))
                 if len(groups[-i]) > 3 and len(groups[-j]) > 3:
                     start = time.time()
                     # local_k1,local_k2=find_common_subgraph(G.subgraph(groups[-i]),GU.subgraph(groups[-j]))
@@ -157,12 +157,12 @@ def all_common(G, groups, pivot=-1):
                     # all_K=add_K(all_K,local_k1,GU)
                     all_k1.append(local_k1)
                     all_k2.append(local_k2)
-                    print "----> time elapsed: %f len(all_k1):%d" % (time.time() - start, len(local_k1))
+                    print("----> time elapsed: %f len(all_k1):%d" % (time.time() - start, len(local_k1)))
     else:
         i = pivot
-        for j in xrange(i + 1, len(groups)):
-            print "group\t %s\t vs\t %s:" % (i, j)
-            print "nodes\t %s\t vs\t %s:" % (len(groups[-i]), len(groups[-j]))
+        for j in range(i + 1, len(groups)):
+            print("group\t %s\t vs\t %s:" % (i, j))
+            print("nodes\t %s\t vs\t %s:" % (len(groups[-i]), len(groups[-j])))
             if len(groups[-i]) > 3 and len(groups[-j]) > 3:
                 start = time.time()
                 # local_k1,local_k2=find_common_subgraph(G.subgraph(groups[-i]),GU.subgraph(groups[-j]))
@@ -170,7 +170,7 @@ def all_common(G, groups, pivot=-1):
                 # all_K=add_K(all_K,local_k1,GU)
                 all_k1.append(local_k1)
                 all_k2.append(local_k2)
-                print "----> time elapsed: %d len(all_k1):%d" % (time.time() - start, len(local_k1))
+                print("----> time elapsed: %d len(all_k1):%d" % (time.time() - start, len(local_k1)))
 
     return all_k1, all_k2
 
@@ -181,14 +181,14 @@ def add_K(all_K, local_K, G2, flag=0):
 
     for k in local_K:
         new = 1
-        for key in all_K.keys():
+        for key in list(all_K.keys()):
             graph, occ = all_K[key]
 
             if nx.is_isomorphic(G2.subgraph(k), G2.subgraph(graph)):
                 all_K[key][1] += 1
                 new = 0
         if new or flag:
-            all_K[len(all_K.keys()) + 1] = [k, 1]
+            all_K[len(list(all_K.keys())) + 1] = [k, 1]
 
     return all_K
 
@@ -209,7 +209,7 @@ def factors(n, result):
 
 def common_plot(all_K, G, flag=0):
     plt.figure()
-    keys = all_K.keys()
+    keys = list(all_K.keys())
     if flag:
         keys = [key for key in list(all_K) if all_K[key][1] > 10]
     fac = factors(len(keys), result=[1])
@@ -246,17 +246,17 @@ def find_common(G1, G2):
     #    edge2add=[((edge1[0],edge2[0]),(edge1[1],edge2[1])) for edge1 in nx.complement(G1).edges() for edge2 in nx.complement(G2).edges() ]
     #    G12.add_edges_from(edge2add)
 
-    print "G12 created", time.time() - start
+    print("G12 created", time.time() - start)
     C12, mapping = nx_to_igraph(G12, pos_flag=0, direction=False)
 
-    print "C12 created", time.time() - start
+    print("C12 created", time.time() - start)
 
-    i_mapping = dict(zip(mapping.values(), mapping.keys()))
+    i_mapping = dict(list(zip(list(mapping.values()), list(mapping.keys()))))
 
     cliques = C12.largest_cliques()
 
     del C12
-    print "Cliques!", len(cliques), time.time() - start
+    print("Cliques!", len(cliques), time.time() - start)
     N_cli = 0
     all_maps = []
     for tmp in cliques:
@@ -316,18 +316,18 @@ def find_common2(G1, G2):
                 nx.complement(G2).edges()]
     G12.add_edges_from(edge2add)
 
-    print "G12 created", time.time() - start
+    print("G12 created", time.time() - start)
     C12, mapping = nx_to_igraph(G12, pos_flag=0, direction=True)
     del G12
 
-    print "C12 created", time.time() - start
+    print("C12 created", time.time() - start)
 
-    i_mapping = dict(zip(mapping.values(), mapping.keys()))
+    i_mapping = dict(list(zip(list(mapping.values()), list(mapping.keys()))))
     tstart = time.time()
     cliques = C12.largest_cliques()
-    print time.time() - tstart
+    print(time.time() - tstart)
     del C12
-    print "Cliques!", len(cliques), time.time() - start
+    print("Cliques!", len(cliques), time.time() - start)
     N_cli = 0
     all_maps_G1 = set()
     all_maps_G2 = set()
@@ -358,8 +358,8 @@ def find_common2(G1, G2):
                     nx.draw(tmp_1)
                     plt.subplot(122)
                     nx.draw(tmp_2)
-                    print " map_G1", map_G1
-                    print " map_G2", map_G2
+                    print(" map_G1", map_G1)
+                    print(" map_G2", map_G2)
 
     def track2(path1, path2):
 
@@ -389,7 +389,7 @@ def find_common2(G1, G2):
     all_path2 = []
     i_c = 0
     for path1, path2 in zip(all_maps_G1, all_maps_G2):
-        print i_c, len(all_maps_G1)
+        print(i_c, len(all_maps_G1))
         i_c += 1
         if nx.is_isomorphic(G1.subgraph(path1), G2.subgraph(path2)):
             # track2(list(path1),list(path2))
@@ -439,7 +439,7 @@ def find_common_subgraph(G1, G2):
         path1 = [ele[0]]
         path2 = [ele[1]]
         track1(path1, path2, copy.deepcopy(G1), copy.deepcopy(G2))
-    print i, len(n1xn2), time.time() - start
+    print(i, len(n1xn2), time.time() - start)
     return all_path1, all_path2
 
 
@@ -450,7 +450,7 @@ def unify(all_K):
 
     for ii in [1, 2]:
 
-        print N_group
+        print(N_group)
         ele = all_K[ii - 1]
         count = 0
         j = 0
@@ -503,7 +503,7 @@ def test(G1):
     def track(path1):
         for up in [ele for i in path1 for ele in G1.to_undirected().neighbors(i) if ele not in path1]:
             path1.extend([up])
-            print path1
+            print(path1)
 
     for ele in G1.nodes():
         path1 = [ele]

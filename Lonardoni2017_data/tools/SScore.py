@@ -46,15 +46,15 @@ def Iterate_HierClust(FeatureMatrix, nBranches, method='complete', criterion='di
         ClustInfo['params']['cut-value'].append(th2use)
         tmp = silhouette_score(FeatureMatrix, labels - 1, metric=metric)
         FmaxL.append([tmp, L, th])
-    print " "
+    print(" ")
     Fmax = sorted(FmaxL, key=lambda x: x[0])[-1]
     Lind = dict()
     Lind[0] = FmaxL.index(Fmax)
 
     data2return = sorted(FmaxL, key=lambda x: x[0])[-10]
-    print data2return
+    print(data2return)
     data2return[-1] = .5 * (FmaxL[Lind[0]][-1] + FmaxL[Lind[0] - 1][-1])
-    print data2return
+    print(data2return)
     return data2return
 
 def line_picker(line, mouseevent):

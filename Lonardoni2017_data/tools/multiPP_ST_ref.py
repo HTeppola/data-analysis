@@ -54,17 +54,17 @@ def runFunctionsInParallel(listOf_FuncAndArgLists, kwargs=None, names=None, offs
         djobs = sjobs if showmax >= len(sjobs) else sjobs[:showmax]
 
         tableFormatString = '%s\t%' + str(max([len(job.name) for job in djobs])) + 's:\t%9s\t%s\t%s\t%s'
-        if print_info: print('\n' + '-' * 75 + '\n' + tableFormatString % ('alive?', 'Job', 'exit code', 'Full', 'Empty', 'Func',) + '\n' + '-' * 75)
+        if print_info: print(('\n' + '-' * 75 + '\n' + tableFormatString % ('alive?', 'Job', 'exit code', 'Full', 'Empty', 'Func',) + '\n' + '-' * 75))
         # Check that we aren't going to show more *successfully finished* jobs than we're allowed: Find index of nth-last successful one. That is, if the limit binds, we should show the latest N=showsuccessful ones only.
         isucc = [ii for ii, job in enumerate(djobs) if job.exitcode == 0]
         earliestSuccess = -1 if len(isucc) < showsuccessful else isucc[::-1][showsuccessful - 1]
-        if print_info: print('\n'.join([tableFormatString % (job.is_alive() * 'Yes:', job.name, job.exitcode, queues[iii].full(), queues[iii].empty(),'(built-in function)' if not hasattr(listOf_FuncAndArgLists[ii][0], 'func_name') else listOf_FuncAndArgLists[ii][0].func_name) for ii, job in enumerate(djobs) if job.exitcode != 0 or ii >= earliestSuccess]))
+        if print_info: print(('\n'.join([tableFormatString % (job.is_alive() * 'Yes:', job.name, job.exitcode, queues[iii].full(), queues[iii].empty(),'(built-in function)' if not hasattr(listOf_FuncAndArgLists[ii][0], 'func_name') else listOf_FuncAndArgLists[ii][0].__name__) for ii, job in enumerate(djobs) if job.exitcode != 0 or ii >= earliestSuccess])))
 
         if len(isucc) > showsuccessful:
-            if print_info: print('%d other jobs finished successfully.' % (len(isucc) - showsuccessful))
+            if print_info: print(('%d other jobs finished successfully.' % (len(isucc) - showsuccessful)))
         if len(sjobs) > len(djobs):
-            if print_info: print('%d more jobs waiting for their turn to start...' % (len(sjobs) - len(djobs)))
-        if print_info: print('-' * 75 + '\n')
+            if print_info: print(('%d more jobs waiting for their turn to start...' % (len(sjobs) - len(djobs))))
+        if print_info: print(('-' * 75 + '\n'))
         return [job.exitcode for ii, job in enumerate(sjobs)]
 
     def emptyQueues():  # jobs,queues,gotQueues):
@@ -102,7 +102,7 @@ def runFunctionsInParallel(listOf_FuncAndArgLists, kwargs=None, names=None, offs
                     jobs[ii].start()
                     flag += -1
 
-    queues = [Queue() for _ in xrange(maxAtOnce)]  # create a queue object for each function
+    queues = [Queue() for _ in range(maxAtOnce)]  # create a queue object for each function
     delays = list(np.arange(cpu_max) * offsetsSeconds)
 
     jobs = [Process(target=functionWrapper, args=[funcArgs[0], queues[iii]],
@@ -157,7 +157,7 @@ def runFunctionsInParallel(listOf_FuncAndArgLists, kwargs=None, names=None, offs
         #        print ii,
         if len(gotQueues[ii]) == 0:
             gotQueues[ii] = None
-    print " "
+    print(" ")
     # Give final report of exit statuses?
     success = reportStatus(jobs, np.inf)
     # names=[names[iii] if names[iii] is not None else fff[0].func_name for iii,fff in enumerate(listOf_FuncAndArgLists)]
@@ -168,7 +168,7 @@ def runFunctionsInParallel(listOf_FuncAndArgLists, kwargs=None, names=None, offs
         return False
     else:
         print('MULTIPROCESSING: Apparent success of all functions')
-        print ('MULTIPROCESSING: %d s elapsed for computation' % (time.time() - start))
+        print(('MULTIPROCESSING: %d s elapsed for computation' % (time.time() - start)))
     return success, [gotQueues[ii] for ii in range(len(gotQueues))]
 
 

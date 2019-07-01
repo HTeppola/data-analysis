@@ -16,21 +16,21 @@ from matplotlib.collections import LineCollection
 
 def reduce_community(com, pos, nMax=50):
     com = np.asarray(com)
-    posx, posy = zip(*pos.values())
+    posx, posy = list(zip(*list(pos.values())))
     posx = np.asarray(posx)
     posy = np.asarray(posy)
     sset = np.arange(len(com))
     tset = sset[sset >= 0]
-    print posx.shape
-    print posy.shape
-    print np.mean(posx[com[tset]]), np.mean(posy[com[tset]])
+    print(posx.shape)
+    print(posy.shape)
+    print(np.mean(posx[com[tset]]), np.mean(posy[com[tset]]))
     while len(tset) > nMax:
         x = np.mean(posx[com[tset]])
         y = np.mean(posy[com[tset]])
         dist = [abs(posx[node] - x) + abs(posy[node] - y) for node in com[tset]]
         sset[np.where(tset[np.argmax(dist)] == sset)[0]] = -1
         tset = sset[sset >= 0]
-    print np.mean(posx[com[tset]]), np.mean(posy[com[tset]])
+    print(np.mean(posx[com[tset]]), np.mean(posy[com[tset]]))
     return np.asarray(com)[tset]
 
 
@@ -53,7 +53,7 @@ def motif_hist2(test_CC):
     n_CC = len(test_CC)
 
     pivot = set()
-    for key in test_CC.keys():
+    for key in list(test_CC.keys()):
         sum_edges = max(sum([count[2] for count in test_CC[key]]), 1)
 
         counts = np.array([count[2] * 1. / sum_edges for count in test_CC[key]])
@@ -82,7 +82,7 @@ def motif_hist2(test_CC):
         tmp = 0
         for i in pivot:
             tmppos = {}
-            in4g = test_CC.keys()[0]
+            in4g = list(test_CC.keys())[0]
             N = test_CC[in4g][i][1].nodes()
             k = 0
             NN = len(N)
@@ -106,7 +106,7 @@ def motif_hist2(test_CC):
 
 
 def extract_functional_graph3(G, hlist, mapp, mapt, D=(), show_plot=False, flag_scatter=False):
-    print G.name
+    print(G.name)
     link = nx.Graph()
 
     if show_plot:
@@ -124,12 +124,12 @@ def extract_functional_graph3(G, hlist, mapp, mapt, D=(), show_plot=False, flag_
     except:
         pass
     mapp[D < 1] = 0
-    index = zip(*np.where((D > 0) & (mapp > np.percentile(mapp[mapp > 0], 95))))
+    index = list(zip(*np.where((D > 0) & (mapp > np.percentile(mapp[mapp > 0], 95)))))
 
-    print "percentile", np.percentile(mapp, 95)
-    print "percentileAdj", np.percentile(mapp[mapp > 0], 95)
+    print("percentile", np.percentile(mapp, 95))
+    print("percentileAdj", np.percentile(mapp[mapp > 0], 95))
 
-    rData = [rankdata(-mapp[i, :]) for i in xrange(len(mapp))]
+    rData = [rankdata(-mapp[i, :]) for i in range(len(mapp))]
     for i, j in index:
         if rData[i][j] < 10 and rData[j][i] < 10:
             #            if mapp[i,j]>=np.percentile(mapp[i,:][mapp[i,:]>0],90) and mapp[i,j]>=np.percentile(mapp[j,:][mapp[j,:]>0],90):
@@ -173,7 +173,7 @@ def extract_components_from_functional(link, G, fname='test', show_plot=False):
     partition = community.best_partition(link)
     list_nodes = []
     for com in set(partition.values()):
-        list_nodes.append([nodes for nodes in partition.keys() if partition[nodes] == com])
+        list_nodes.append([nodes for nodes in list(partition.keys()) if partition[nodes] == com])
 
     # list_nodes=it.graph_partition(link)
 
@@ -186,21 +186,21 @@ def extract_components_from_functional(link, G, fname='test', show_plot=False):
 
             all_sub.append(subg)
             pos = nx.get_node_attributes(subg, 'pos')
-            points = [(pos[key][0], pos[key][1]) for key in pos.keys()]
+            points = [(pos[key][0], pos[key][1]) for key in list(pos.keys())]
             if len(np.unique([ele[0] for ele in points])) == 1 or len(np.unique([ele[1] for ele in points])) == 1:
                 points.append((points[-1][0] + .01, points[-1][1] + .01))
             try:
                 elements, hull_index = cv.hull(0.1, points, plot=1)
 
                 def get_index(point, pos):
-                    for index, value in pos.iteritems():
+                    for index, value in pos.items():
                         if value[0] == points[point][0]: return index
 
                 allpos = nx.get_node_attributes(H, 'pos')
 
                 allpoints = []
-                Pdict = np.asarray([key for key in allpos.keys()])
-                P2test = np.asarray([[allpos[key][0], allpos[key][1]] for key in allpos.keys()])
+                Pdict = np.asarray([key for key in list(allpos.keys())])
+                P2test = np.asarray([[allpos[key][0], allpos[key][1]] for key in list(allpos.keys())])
                 contained = np.zeros(len(P2test))
                 for triangle in elements:
                     Pth = matplotlib.path.Path(triangle)
@@ -300,10 +300,10 @@ def extract_components_from_functional(link, G, fname='test', show_plot=False):
                 com2test)
         motif_hist2(test_CC)
 
-    print "---------------------------------------------------------------------"
-    print "---------------------------------------------------------------------"
-    print "---------------------------------------------------------------------"
-    print "---------------------------------------------------------------------"
+    print("---------------------------------------------------------------------")
+    print("---------------------------------------------------------------------")
+    print("---------------------------------------------------------------------")
+    print("---------------------------------------------------------------------")
     return all_refined, allpoints, all_nodes, all_contour, all_sub, RNDG, all_triangle, test_CC, test_CC_nodes
 
 
@@ -327,9 +327,9 @@ def count_motifs(th_motif, H, all_refined):
 
         if H.subgraph(allpoints).size() > 10:
             com2test.append(H.subgraph(allpoints).copy())
-            print "count", count, "# nodes --------------------->", len(allpoints)
-            print "count", count, "# edges --------------------->", K.size()
-            print "\t price to pay", len(K.edges()) * 1. / len(nx.complete_graph(max(len(allpoints), 2)).edges())
+            print("count", count, "# nodes --------------------->", len(allpoints))
+            print("count", count, "# edges --------------------->", K.size())
+            print("\t price to pay", len(K.edges()) * 1. / len(nx.complete_graph(max(len(allpoints), 2)).edges()))
             #            task2exec.append([mp2.motif_main,[th_motif,H.subgraph(allpoints).to_undirected(),count]])
             # test_CC[count]=test_CC[count]=m.motif_counts(6,H.subgraph(subg.nodes()))
             test_CC[count] = mp2.motif_main_IG(th_motif, H.subgraph(allpoints).to_undirected(), count)[
@@ -339,12 +339,12 @@ def count_motifs(th_motif, H, all_refined):
             if count > 5:
                 break
 
-    print "ELAPSED:", time.time() - start
+    print("ELAPSED:", time.time() - start)
     return test_CC, test_CC_nodes, com2test
 
 
 def add_entire_graph(test_CC, H, all_nodes, th_motif, fCOM):
-    print "ENTIRE GRAPH"
+    print("ENTIRE GRAPH")
     pool = H.nodes()
     for ele in all_nodes:
         for item in ele:
@@ -366,12 +366,12 @@ def add_entire_graph(test_CC, H, all_nodes, th_motif, fCOM):
         if nMax < len(fCOM):
             ele = reduce_community(ele, pos, len(fCOM[nMax]))
             K = H.subgraph(ele)
-            print "Gcount", count, "# nodes --------------------->", len(ele)
-            print "Gcount", count, "# edges --------------------->", K.size()
+            print("Gcount", count, "# nodes --------------------->", len(ele))
+            print("Gcount", count, "# edges --------------------->", K.size())
             com2test.append(K.copy())
             allpoints = [ele for ele in K.nodes() if ele not in nx.isolates(K)]
-            print "Gcount", count, "# Cnodes --------------------->", len(H.subgraph(allpoints))
-            print "\t price to pay", len(K.edges()) * 1. / len(nx.complete_graph(max(len(allpoints), 2)).edges())
+            print("Gcount", count, "# Cnodes --------------------->", len(H.subgraph(allpoints)))
+            print("\t price to pay", len(K.edges()) * 1. / len(nx.complete_graph(max(len(allpoints), 2)).edges()))
 
             test_CC['SC-%d' % count] = mp2.motif_main_IG(th_motif, H.subgraph(allpoints).to_undirected(), count)[
                 0]  # test_CC[count]=m.motif_counts(6,H.subgraph(subg.nodes()))
@@ -383,17 +383,17 @@ def add_entire_graph(test_CC, H, all_nodes, th_motif, fCOM):
 
 
 def add_entire_graph_random(test_CC, H, all_nodes, th_motif, fCOM):
-    print "ENTIRE GRAPH"
+    print("ENTIRE GRAPH")
     flatRemoveList = [item for ele in all_nodes for item in ele]
     pool = [node for node in H.nodes() if node not in flatRemoveList]
     HH = H.subgraph(pool)
 
     pos = nx.get_node_attributes(HH, 'pos')
-    refined = [[] for _ in xrange(9)]
-    for key, value in pos.iteritems():
+    refined = [[] for _ in range(9)]
+    for key, value in pos.items():
         count = 0
-        for i in xrange(3):
-            for j in xrange(3):
+        for i in range(3):
+            for j in range(3):
                 if i < value[0] * 3 < i + 1 and j < value[1] * 3 < j + 1:
                     refined[count].append(key)
                 count += 1
@@ -407,13 +407,13 @@ def add_entire_graph_random(test_CC, H, all_nodes, th_motif, fCOM):
         if nMax < len(fCOM):
             ele = reduce_community(ele, pos, len(fCOM[nMax]))
             K = H.subgraph(ele)
-            print "Gcount", count, "# nodes --------------------->", len(ele)
-            print "Gcount", count, "# edges --------------------->", K.size()
+            print("Gcount", count, "# nodes --------------------->", len(ele))
+            print("Gcount", count, "# edges --------------------->", K.size())
             com2test.append(K.copy())
             allpoints = [ele for ele in K.nodes() if ele not in nx.isolates(K)]
-            print "Gcount", count, "# Cnodes --------------------->", len(H.subgraph(allpoints))
+            print("Gcount", count, "# Cnodes --------------------->", len(H.subgraph(allpoints)))
             p2pay = len(K.edges()) * 1. / len(nx.complete_graph(max(len(allpoints), 2)).edges())
-            print "\t price to pay", p2pay
+            print("\t price to pay", p2pay)
 
             test_CC['RC-%d' % count] = mp2.motif_main_IG(th_motif, H.subgraph(allpoints).to_undirected(), K.size())[
                 0]  # test_CC[count]=m.motif_counts(6,H.subgraph(subg.nodes()))
@@ -430,7 +430,7 @@ def plot_concave_components(H, all_contour, all_nodes, ISs=[]):
     performance = []
     colors = []
     CCC = len(all_contour) + 1
-    for j in xrange(len(all_contour)):
+    for j in range(len(all_contour)):
 
         i = j
         ct2analyze = all_contour[i]
@@ -448,7 +448,7 @@ def plot_concave_components(H, all_contour, all_nodes, ISs=[]):
                 for points in ISs:
                     flag = 0
                     if len(points[0]):
-                        for kkk in xrange(len(x)):
+                        for kkk in range(len(x)):
                             xx = x[kkk]
                             yy = y[kkk]
                             if abs(xx - points[0][0]) ** 2 + abs(yy - points[1][0]) ** 2 < .05 ** 2:
@@ -464,7 +464,7 @@ def plot_concave_components(H, all_contour, all_nodes, ISs=[]):
                     CCC -= 1
                     colorFCOM = list(plt.get_cmap('jet')(CCC * 1. / len(all_contour)))
                     colors = []
-                    for i in xrange(20):
+                    for i in range(20):
                         colors.append(colorFCOM)
                         colors[-1][-1] = 1 - i * 1. / 20
                         colors[-1] = tuple(colors[-1])
@@ -503,7 +503,7 @@ def plot_concave_components_LW(H, all_contour, all_nodes, ISs=[], composition=[]
     CCC = len(all_contour) + 1
     clusterAssigned = np.ones(len(ISs)) * -1
 
-    for j in xrange(len(all_contour)):
+    for j in range(len(all_contour)):
 
         i = j
         ct2analyze = all_contour[i]
@@ -589,7 +589,7 @@ def plot_concave_components_NC(H, all_contour, all_nodes, ISs=[]):
     performance = []
     colors = []
     CCC = len(all_contour) + 1
-    for j in xrange(len(all_contour)):
+    for j in range(len(all_contour)):
 
         i = j
         ct2analyze = all_contour[i]
@@ -607,7 +607,7 @@ def plot_concave_components_NC(H, all_contour, all_nodes, ISs=[]):
                 for points in ISs:
                     flag = 0
                     if len(points[0]):
-                        for kkk in xrange(len(x)):
+                        for kkk in range(len(x)):
                             xx = x[kkk]
                             yy = y[kkk]
                             if abs(xx - points[0][0]) ** 2 + abs(yy - points[1][0]) ** 2 < .05 ** 2:
@@ -623,7 +623,7 @@ def plot_concave_components_NC(H, all_contour, all_nodes, ISs=[]):
                     CCC -= 1
                     colorFCOM = list(plt.get_cmap('jet')(CCC * 1. / len(all_contour)))
                     colors = []
-                    for i in xrange(20):
+                    for i in range(20):
                         colors.append(colorFCOM)
                         colors[-1][-1] = 1 - i * 1. / 20
                         colors[-1] = tuple(colors[-1])
@@ -641,8 +641,8 @@ def functional_graph_plot(subg, link, flag=0):
     w = []
     tau = []
     limits = [[], []]
-    pos = nx.get_node_attributes(link, 'pos').values()
-    x, y = zip(*pos)
+    pos = list(nx.get_node_attributes(link, 'pos').values())
+    x, y = list(zip(*pos))
     for ele in link.edges(data=True):
         w.append(ele[2]['weight'])
         tau.append(abs(ele[2]['tau']))

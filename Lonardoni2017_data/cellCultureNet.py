@@ -96,7 +96,7 @@ def CreateAdExpcells(N, G, percInh=.2, varDt=[False], pos={}, replicate=False, R
     CellList = []
     coord = {}
 
-    for i in xrange(N):
+    for i in range(N):
         coord['x'] = pos[i][0]
         coord['y'] = pos[i][1]
         #   Append to cell list the new neuron accordingly to its type
@@ -107,7 +107,7 @@ def CreateAdExpcells(N, G, percInh=.2, varDt=[False], pos={}, replicate=False, R
                 modParCopy=modParinh.copy()
             else:
                 modParCopy = modParexc.copy()
-            for key,value in G.node[i].iteritems():
+            for key,value in G.node[i].items():
                 modParCopy[key] = value
             rndPar['parnoise'] = 0
             CellList.append(
@@ -158,8 +158,8 @@ def ConnectNetwork(G, net_w, mAMPA=1, printFlag=False):
             destLink = link[1]
             CellList[cell].connect_to(dest=CellList[destLink], net_w=net_w, mAMPA=mAMPA)
             if printFlag:
-                print "Neuron #", cell, " of nature ", CellList[cell].ID_syn, " connects to: ", destLink, "delay: ", \
-                    CellList[cell].PreList[-1].delay
+                print("Neuron #", cell, " of nature ", CellList[cell].ID_syn, " connects to: ", destLink, "delay: ", \
+                    CellList[cell].PreList[-1].delay)
 
 
 def SetAttribute(G):
@@ -274,40 +274,40 @@ def NetworkMaker(mAMPA=1, ifNMDA=1, graph=nx.DiGraph(), N=256, peso=110, rpeso=3
         gnameold = gname
     sname += '%s_%s_%s_' % (peso, rpeso, tot)
 
-    print "graph processed in ", time.time() - start_time, " s \n"
+    print("graph processed in ", time.time() - start_time, " s \n")
     # tools.SaveGraph(G,fname=gname,folder='/res/'+groupname+'/Graph/')
     partial_time = time.time()
     readout = False
     if readout:
 
-        posx = np.array([ele[0] for ele in pos.values()])
-        posy = np.array([ele[1] for ele in pos.values()])
+        posx = np.array([ele[0] for ele in list(pos.values())])
+        posy = np.array([ele[1] for ele in list(pos.values())])
         index = np.where((abs(posx - .5) < .1) & (abs(posy - .5) < .1))[0]
         N = len(G.nodes())
-        print N
-        for j in xrange(N, N + 10):
+        print(N)
+        for j in range(N, N + 10):
             for i in index:
                 G.add_path([i, j])
 
-        for i in xrange(N, N + 10):
+        for i in range(N, N + 10):
             G.node[i]['pos'] = [.5, .5]
-        print len(G.nodes())
+        print(len(G.nodes()))
         pos = nx.get_node_attributes(G, 'pos')
     CreateAdExpcells(N=len(G.nodes()), varDt=vardt, pos=pos, replicate=replicate, G=G, percInh=percInh, RecAll=2)
-    print "cells created in ", time.time() - partial_time, " s \n"
+    print("cells created in ", time.time() - partial_time, " s \n")
     if recAll==2:
-        for i in xrange(10):
+        for i in range(10):
             CellList[i].RecAll_traces()
     partial_time = time.time()
 
     #   connect the network according to the generated/provided graph
     ConnectNetwork(G, modWeight, mAMPA=mAMPA, printFlag=False)
 
-    print "cells connected in ", time.time() - partial_time, " s\n"
+    print("cells connected in ", time.time() - partial_time, " s\n")
 
     h.tstop = ts
 
-    print "Running\n"
+    print("Running\n")
 
     if tipo == 0:
         gtype = 'imported from ../Topologies/' + gnameold
@@ -362,7 +362,7 @@ def StartSmallNetTest(peso=37.5, rpeso=18, U=0.5, magnitude=0.05, vblock=-35, kb
     percInh = 0
     NCells = 3
     stimPar['active'] = -1
-    pos={i: np.random.random(2) for i in xrange(NCells)}
+    pos={i: np.random.random(2) for i in range(NCells)}
     CreateAdExpcells(N=NCells, G={},  pos=pos, varDt=[True, 1, 1],percInh=percInh, RecAll=2)
     G = nx.DiGraph()
     G.add_path([0, 2])
@@ -378,7 +378,7 @@ def StartSmallNetTest(peso=37.5, rpeso=18, U=0.5, magnitude=0.05, vblock=-35, kb
 	'''
 
 
-    for i in xrange(len(CellList)):
+    for i in range(len(CellList)):
         CellList[i].AdExp.v0_block = vblock
         CellList[i].AdExp.k_block = kb
         CellList[i].RecAll_traces()
@@ -392,7 +392,7 @@ def StartSmallNetTest(peso=37.5, rpeso=18, U=0.5, magnitude=0.05, vblock=-35, kb
     axV = plt.subplot(NCells, 3, 1)
     axG = plt.subplot(NCells, 3, 2)
     axI = plt.subplot(NCells, 3, 3)
-    for i in xrange(NCells):
+    for i in range(NCells):
         plt.subplot(NCells, 3, 3 * i + 1,sharex=axV)
         ut.PlotVoltage(CellList[i])
         plt.subplot(NCells, 3, 3 * i + 2,sharex=axG)
@@ -417,23 +417,23 @@ def save_summary(tipo, gnameold, gname, pinh, path, groupname, ts, N):
               'syninh': modWeight['syninh'], 'synnoise': rndPar['peso'], 'stimuli': stimuli}
 
     f1 = open(path + groupname + 'summary.txt', 'w')
-    print >> f1, 'Simulation of %s neurons over %s (s)' % (N, ts / 1000)
-    print >> f1, 'Graph: %s' % gname,
+    print('Simulation of %s neurons over %s (s)' % (N, ts / 1000), file=f1)
+    print('Graph: %s' % gname, end=' ', file=f1)
     if tipo == 0:
-        print >> f1, ' imported from /Topologies'
+        print(' imported from /Topologies', file=f1)
     else:
-        print >> f1, ' created'
-    print >> f1, 'Percentage of inh neurons: %s' % pinh
-    print >> f1, 'Exc syn strength: %s' % modWeight['synexc']
-    print >> f1, 'Inh syn strength: %s' % modWeight['syninh']
-    print >> f1, 'Noise strength: %s' % rndPar['peso']
+        print(' created', file=f1)
+    print('Percentage of inh neurons: %s' % pinh, file=f1)
+    print('Exc syn strength: %s' % modWeight['synexc'], file=f1)
+    print('Inh syn strength: %s' % modWeight['syninh'], file=f1)
+    print('Noise strength: %s' % rndPar['peso'], file=f1)
     if stimPar['active'] == -1:
-        print >> f1, 'Spontaneous activity'
+        print('Spontaneous activity', file=f1)
     else:
-        print >> f1, 'Evoked activity'
-        print >> f1, '\t Time interval among stimula: %s (ms)' % stimPar['rate']
-        print >> f1, '\t # of stimula: %s' % stimPar['step']
-        print >> f1, '\t First delivered stimulus stimula: %s (ms)' % stimPar['start']
+        print('Evoked activity', file=f1)
+        print('\t Time interval among stimula: %s (ms)' % stimPar['rate'], file=f1)
+        print('\t # of stimula: %s' % stimPar['step'], file=f1)
+        print('\t First delivered stimulus stimula: %s (ms)' % stimPar['start'], file=f1)
     f1.close()
     return HEADER
 
@@ -480,8 +480,8 @@ def replicate_sim(G, degree='degree', inv=0):
     GR = nx.DiGraph()
     deg=dict()
     ideg=dict()
-    exec 'deg= np.array(G.%s().values())' % degree
-    exec 'ideg= np.array(G.%s().keys())' % degree
+    exec('deg= np.array(G.%s().values())' % degree)
+    exec('ideg= np.array(G.%s().keys())' % degree)
     deg = deg[pivot]
     ideg = ideg[pivot]
     sdeg = deg.argsort()  # [::-1]
@@ -493,7 +493,7 @@ def replicate_sim(G, degree='degree', inv=0):
     R = np.array(R)
     sR = R[0, :].argsort()
 
-    for i in xrange(len(H.nodes())):
+    for i in range(len(H.nodes())):
         relabel = sdeg[i]
         tmp = nx.DiGraph()
         tmp = nx.compose(tmp, copy.deepcopy(H.subgraph(R[1, sR[i]])))
@@ -509,7 +509,7 @@ def replicate_sim(G, degree='degree', inv=0):
     GR.add_edges_from(G.edges())
 
     R = np.array([GR.node[i]['R'] * 1000 for i in GR.nodes() if i in pivot])
-    exec 'deg=[value for key,value in GR.%s().iteritems() if key in pivot]' % degree
+    exec('deg=[value for key,value in GR.%s().iteritems() if key in pivot]' % degree)
     plt.scatter(deg, R, color='b')
     return GR
 

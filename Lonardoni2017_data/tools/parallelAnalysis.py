@@ -26,12 +26,12 @@ def construct_ISs(fNameList, n_work=10, destPath=''):
             path2file = folder + '/Spike/' + fname
             dest = folder + '/' + fname[:-4] + '_IS2.npy'
             if fname[:-4] + '_IS.npy' in os.listdir(folder) and 0:
-                print "already analyzed"
-                print dest
+                print("already analyzed")
+                print(dest)
 
             else:
                 task2exec.append([workerIS, [path2file, dest, destPath], ])
-    print task2exec
+    print(task2exec)
     if any(task2exec):
         runFunctionsInParallel(listOf_FuncAndArgLists=task2exec,  maxAtOnce=n_work,SZORDAN=0)
 
@@ -49,21 +49,21 @@ def construct_maps(folder, fname, n_work=20):
         hlist = np.load(path2file).tolist()[1:]
 
         if fname[:-4] + '_mapp.npy' in os.listdir(folder.split('/Spike/')[0]) and 0:
-            print "already analyzed"
-            print dest
+            print("already analyzed")
+            print(dest)
             return ['done', 'done']
     else:
         return ['done', 'done']
 
     lh = len(hlist)
     Tmax = np.max([np.max(cell['spikes']) for cell in hlist if any(cell['spikes'])])
-    print "Computing Cross-Correlation of", fname
-    print "%d x %d pairs" % (lh, lh)
+    print("Computing Cross-Correlation of", fname)
+    print("%d x %d pairs" % (lh, lh))
 
     mapp = np.zeros((lh, lh))
     mapt = np.ones((lh, lh)) * -100
     task2exec = []
-    for i in xrange(lh):
+    for i in range(lh):
         task2exec.append([worker, [i, ], ])
 
     sRCC = runFunctionsInParallel(listOf_FuncAndArgLists=task2exec, maxAtOnce=n_work)
@@ -71,7 +71,7 @@ def construct_maps(folder, fname, n_work=20):
         mapp[i, :] = vmapp
         mapt[i, :] = vmapt
     mapp = mapp + mapp.T
-    for i in xrange(len(mapp)):
+    for i in range(len(mapp)):
         mapp[i, i] = 1
     mapt = mapt - mapt.T
 
@@ -93,18 +93,18 @@ def worker(i):
     toChangeP = np.zeros(lh)
     toChangeT = np.zeros(lh)
     st1 = hlist[i]['spikes']
-    for j in xrange(i + 1, lh):
+    for j in range(i + 1, lh):
         st2 = hlist[j]['spikes']
         if len(st1) > 0 and len(st2) > 0:
             tmp = CrossCorrFastOriginal(np.asarray(st1).copy(), np.asarray(st2).copy(), twin, tbin, Tmax)
         else:
             tmp = np.zeros(10)
-        tmp = [np.mean(tmp[max(ic - 1, 0):ic + 2]) for ic in xrange(len(tmp))]
+        tmp = [np.mean(tmp[max(ic - 1, 0):ic + 2]) for ic in range(len(tmp))]
         NN = len(np.unique(tmp))
         if NN < 15:
             tmp = np.zeros(10)
         else:
-            print j, NN
+            print(j, NN)
         # plt.plot(np.arange(-twin,twin+tbin,tbin),tmp)
         #            plt.savefig('/home/alonardoni/8192correlation/testFC/corr%05d.png'%j)
         #            plt.close()
@@ -167,8 +167,8 @@ def workerIS(path2file, dest, destPath):
 
         figname = path2file.split('/')[-1]
         figname = os.path.splitext(figname)[0]
-        print figname
-        print destPath
+        print(figname)
+        print(destPath)
         try:
             os.stat(destPath)
         except:
@@ -179,7 +179,7 @@ def workerIS(path2file, dest, destPath):
         #        np.save(open(dest,'w'),out[-1])
         np.save(open(dest, 'w'), out[0])
         np.save(open(dest[:-4] + '_cut.npy', 'w'), out[1])
-    print "done"
+    print("done")
     return dest, 1
 
 def NumCommon(STS1, STS2):
@@ -263,18 +263,18 @@ def fastburstcorrelation(path2file, tbin=10, thre=0.883):
     unique = False
     burst = np.load(path2file)
     if len(burst) == 0:
-        print "empty burst"
+        print("empty burst")
         return
 
     N = len(burst[0])
-    print "Nlen: ", N
+    print("Nlen: ", N)
     nburst = len(burst)
-    print "nburst: ", nburst
+    print("nburst: ", nburst)
     tinit = np.ones(nburst) * 1e10
     tend = np.zeros(nburst)
     tmpburst = []
     cell = copy.deepcopy(burst[0][0])
-    for i in xrange(4096):
+    for i in range(4096):
         tmpburst.append(copy.deepcopy(cell))
         cell['ID'] = i
     lburst = []
@@ -284,13 +284,13 @@ def fastburstcorrelation(path2file, tbin=10, thre=0.883):
             lburst[-1][cell['ID']] = copy.deepcopy(cell)
     burst = lburst
     N = len(burst[0])
-    for j in xrange(nburst):
-        for i in xrange(N):
+    for j in range(nburst):
+        for i in range(N):
             if len(burst[j][i]['spikes']) > 0:
                 tinit[j] = int(min(tinit[j], min(burst[j][i]['spikes']) / tbin))
                 tend[j] = int(max(tend[j], max(burst[j][i]['spikes']) / tbin))
-    for j in xrange(nburst):
-        for i in xrange(N):
+    for j in range(nburst):
+        for i in range(N):
             if len(burst[j][i]['spikes']) > 0:
                 if unique:
                     burst[j][i]['spikes'] = np.unique(np.floor(burst[j][i]['spikes'] / tbin).astype(int))
@@ -303,10 +303,10 @@ def fastburstcorrelation(path2file, tbin=10, thre=0.883):
     if nburst >= 2:
 
         BC = np.zeros((nburst, nburst))
-        for h in xrange(nburst):
+        for h in range(nburst):
 
             #            plt.figure()
-            for k in xrange(h, nburst):
+            for k in range(h, nburst):
                 sys.stdout.write("\r Burst %s: %s of %s" % (h, k, nburst))
                 sys.stdout.flush()
                 # tmpcor=0
@@ -316,7 +316,7 @@ def fastburstcorrelation(path2file, tbin=10, thre=0.883):
                     BC[h, k] = 1
                 else:
                     tot = N + 0.
-                    for i in xrange(N):
+                    for i in range(N):
                         if len(burst[h][i]['spikes']) <= 2 or len(burst[k][i]['spikes']) <= 2:
                             tot -= 1
                         else:
@@ -356,23 +356,23 @@ def fastburstcorrelation(path2file, tbin=10, thre=0.883):
         plt.savefig('/' + folderpath + '/Analysis/' + (path2file.split('/')[-1]).split('burst')[0] + 'BC.png')
         plt.figure()
         index = sch.fcluster(Y, t=thre, criterion='distance')
-        for i in xrange(1, max(index) + 1):
-            print "trj", i, "appeared at", tinit[index == i] * tbin / 1000, "s"
+        for i in range(1, max(index) + 1):
+            print("trj", i, "appeared at", tinit[index == i] * tbin / 1000, "s")
             a = tinit[index == i]
             plt.plot(a * tbin / 1000, i * np.ones(len(a)), 'o--', ms=20, lw=5,
                      color=plt.get_cmap('jet')(float(i) / (max(index) + 1)))
             plt.hold(True)
             tmp = np.zeros((sum(index == i), sum(index == i)))
-            for j in xrange(sum(index == i)):
-                for k in xrange(j, sum(index == i)):
+            for j in range(sum(index == i)):
+                for k in range(j, sum(index == i)):
                     tmp[j, k] = BC[np.arange(nburst + 1)[index == i][j], np.arange(nburst + 1)[index == i][k]]
-            print tmp
+            print(tmp)
         plt.ylim([0, max(index) + 1])
         plt.savefig('/' + folderpath + '/Analysis/' + (path2file.split('/')[-1]).split('burst')[0] + 'TBC.png')
         np.save(open(path2file[:-4] + '_index.npy', 'w'), index)
         if 0:
             old = 10
-            for j in xrange(4, nburst):
+            for j in range(4, nburst):
                 ii = 0
                 index = sch.fcluster(Y, t=old + ii, criterion='distance')
                 while max(index) < j:
@@ -380,6 +380,6 @@ def fastburstcorrelation(path2file, tbin=10, thre=0.883):
                     ii += -0.001
                     # print max(index)
                 old = old + ii
-                print max(index), "-cluster optimal", old
+                print(max(index), "-cluster optimal", old)
     plt.show()
     return D

@@ -68,7 +68,7 @@ def hull(alpha, points, plot=False):
         ax = plt.gca()
         nx.draw_networkx_edges(K, pos=nx.get_node_attributes(K, 'pos'), ax=ax)
 
-        x, y = zip(*points)
+        x, y = list(zip(*points))
         plt.scatter(x, y)
         plt.xlim([0, 1])
         plt.ylim([0, 1])
@@ -84,23 +84,23 @@ def hull(alpha, points, plot=False):
         tri_trlist = []
         tri_pos = tri.points
         tri_list2 = tri.vertices
-        for i in xrange(len(tri_list2)):
+        for i in range(len(tri_list2)):
             tri_trlist.append([tri_pos[tri_list2[i][0]], tri_pos[tri_list2[i][1]], tri_pos[tri_list2[i][2]]])
             ipos.append(i)
-            print "TRIANGOLO!"
+            print("TRIANGOLO!")
         K.add_edges_from(edges)
         for n in K.nodes(): K.node[n]['pos'] = points[n]
         if plot:
             plt.figure(500)
             ax = plt.gca()
             nx.draw_networkx_edges(K, pos=nx.get_node_attributes(K, 'pos'), ax=ax)
-            x, y = zip(*points)
+            x, y = list(zip(*points))
             plt.scatter(x, y)
             plt.xlim([0, 1])
             plt.ylim([0, 1])
             simpleaxis(plt.gca())
 
-    findex = [nodes for nodes in K.nodes() if len(K.edges(nodes)) > 2 for _ in xrange(len(K.edges(nodes)) / 2)]
+    findex = [nodes for nodes in K.nodes() if len(K.edges(nodes)) > 2 for _ in range(len(K.edges(nodes)) / 2)]
     if len(findex) == 0:
         if len(nodelist):
             findex.append(nodelist[0])
@@ -109,7 +109,7 @@ def hull(alpha, points, plot=False):
     pivot = findex[elen]
     rpos.append(points[pivot])
     ipos.append(pivot)
-    for i in xrange(len(contour) - 1):
+    for i in range(len(contour) - 1):
 
         for edge in K.edges(pivot):
             if K.degree(edge[1]) % 2 == 0:  # edge[1] not in ipos and
@@ -136,16 +136,16 @@ def hull(alpha, points, plot=False):
     tri_list2 = tri2.vertices
 
     tri_list = []
-    for i in xrange(len(tri_list2)):
+    for i in range(len(tri_list2)):
         ele = [0, 0, 0]
-        for j in xrange(3):
+        for j in range(3):
             ele[j] = ipos[tri_list2[i][j]]
         # print ele
         tri_list.append(ele)
         # print tri_list
 
     tri_trlist = []
-    for i in xrange(len(tri_list)):
+    for i in range(len(tri_list)):
         ele = tri_list[i]
         flag = 0
         #        for edge in edge_2_remove:

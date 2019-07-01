@@ -110,13 +110,13 @@ def hysto_degree(G, fname='graph', folder='/'):
         Plot of the two distributions
     """
     path = os.getcwd()
-    degree_sequence = sorted(nx.degree(G).values(), reverse=True)
+    degree_sequence = sorted(list(nx.degree(G).values()), reverse=True)
     plt.figure()
     plt.plot(degree_sequence, 'b-', marker='o')
     plt.ylabel("Degree")
     plt.xlabel("Neuron #")
 
-    degree_sequence = sorted(nx.DiGraph.in_degree(G).values(), reverse=True)
+    degree_sequence = sorted(list(nx.DiGraph.in_degree(G).values()), reverse=True)
     plt.plot(degree_sequence, 'r-', marker='o')
     plt.savefig(path + folder + fname + 'degree.png', bbox_inches='tight', pad_inches=0)
     plt.close('all')
@@ -146,7 +146,7 @@ def detect(fname='nan', folder='/', tbin=5):
         end = np.argmax(rate[start:] < 5. / 8192 * N) + start
         if end - start > twind and max(rate[start:end]) > N * 0.01:
             ID += 1
-            for h in xrange(1, N):
+            for h in range(1, N):
                 pivotstart = np.searchsorted(CellList[h]['spikes'], start * tbin, 'left')
                 pivotend = pivotstart + np.searchsorted(CellList[h]['spikes'][pivotstart:], end * tbin, 'left')
                 times = copy.deepcopy(CellList[h])
@@ -179,7 +179,7 @@ def trj_plot(burst, tbin=2, mswind=10):
     meany = np.divide(meany, rate)
     # tr=np.array([[np.mean(meanx[d-twind:d]),np.mean(meany[d-twind:d])] for d in xrange(twind,len(meanx)-1)])
     tmptr = np.array(
-        [[np.mean(meanx[d - twind:d]), np.mean(meany[d - twind:d])] for d in xrange(twind, len(meanx) - 1)])
+        [[np.mean(meanx[d - twind:d]), np.mean(meany[d - twind:d])] for d in range(twind, len(meanx) - 1)])
     tmptr = tmptr.reshape(-1, 1)
     # print time()-start
     segs = np.concatenate([tmptr[:-1], tmptr[1:]], axis=1)
@@ -196,7 +196,7 @@ def trj_all(fname, gname, folder, mswind=10):
     plt.figure()
     plt.hold(True)
     nx.draw_networkx_edges(G, pos, alpha=0.02)
-    for i in xrange(len(burst)):
+    for i in range(len(burst)):
         burstmp = convert2xN(burst[i])
         # print "Id burst:", i, "\t started at :", int(tin/1000), 's ',end,len(burst)
         # print "tin:", tstart, "tend:",tend
@@ -230,7 +230,7 @@ def SpikeStatWindow(fname, folder, tin, ts=0):
     spikes = np.array(
         [spikes[0][(spikes[1] > tin) & (spikes[1] < ts)], spikes[1][(spikes[1] > tin) & (spikes[1] < ts)]])
     # print "tin:", int(min(spikes[1]/1000)), "to:", int(max(spikes[1]/1000)),ts,tin
-    print "CellList loaded and converted"
+    print("CellList loaded and converted")
     out = UST.SpikeStatistics(spikes, TimeWindow=(ts - tin) / 1000)
     A = UST.ShowSpkStat(out)
     return A
@@ -244,14 +244,14 @@ def hist_mbl(path2file):
     """
     burst = np.load(path2file)
     if len(burst) == 0:
-        print "empty burst"
+        print("empty burst")
         return
     nburst = len(burst)
     N = len(burst[0])
     tinit = np.ones(nburst) * 1e10
     tend = np.zeros(nburst)
-    for j in xrange(nburst):
-        for i in xrange(N):
+    for j in range(nburst):
+        for i in range(N):
             if len(burst[j][i]['spikes']) > 0:
                 tinit[j] = int(min(tinit[j], burst[j][i]['spikes'][0]))
                 tend[j] = int(max(tend[j], burst[j][i]['spikes'][-1]))

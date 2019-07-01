@@ -72,10 +72,10 @@ def CreateRandomGraph(N, p=0.1):
     H = G.to_undirected()
     try:
         n = nx.average_shortest_path_length(G)
-        print "Average Shortest Path : ", n
+        print("Average Shortest Path : ", n)
     except nx.NetworkXError:
-        print 'Average Shortest Path : Disconnected'
-    print "Clustering Coefficient ", nx.average_clustering(H)
+        print('Average Shortest Path : Disconnected')
+    print("Clustering Coefficient ", nx.average_clustering(H))
     return G
 
 
@@ -103,13 +103,13 @@ def random_geometric_gauss(N, dim=2, sigma=1, grad=0, torus=0):
     """
     G = nx.Graph()
     G.name = "Random Geometric Graph"
-    G.add_nodes_from(range(N))
+    G.add_nodes_from(list(range(N)))
 
     #   sample node position uniformly
     for n in G:
         G.node[n]['pos'] = rnd.random(dim)
     if dim == 3:
-        for n in xrange(len(G.nodes())):
+        for n in range(len(G.nodes())):
             G.node[n]['pos'][2] = (1 - G.node[n]['pos'][2] ** grad) * .25
     nodes = G.nodes(data=True)
     #   create the connections
@@ -120,7 +120,7 @@ def random_geometric_gauss(N, dim=2, sigma=1, grad=0, torus=0):
     while nodes:
 
         u, du = nodes.pop()
-        print u
+        print(u)
         pu = du['pos']
         for v, dv in nodes:
             i += 1
@@ -166,7 +166,7 @@ def DirectGraph(G):
     a1 = set(G2.edges())
     a2 = a1.difference(set(GG.edges()))
     H.remove_edges_from(a2)
-    print "elapsed:", time.time() - start
+    print("elapsed:", time.time() - start)
 
     return H
 
@@ -201,7 +201,7 @@ def CreateGauss(N, dim=2, sigma=1, torus=0):
     """
 
     G, edge_list = random_geometric_gauss2(N=N, dim=dim, sigma=sigma, torus=torus)
-    print "done"
+    print("done")
     #    nx.draw(G,pos=nx.get_node_attributes(G,'pos'))
     #    edge_list=G.edges()
     import time
@@ -216,11 +216,11 @@ def CreateGauss(N, dim=2, sigma=1, torus=0):
     edge_list = [shuffle(edge) for edge in edge_list if edge[0] > edge[1]]
 
     H = G.to_directed()
-    print time.time() - start
+    print(time.time() - start)
     H.remove_edges_from(H.edges())
-    print time.time() - start
+    print(time.time() - start)
     H.add_edges_from(edge_list)
-    print time.time() - start
+    print(time.time() - start)
     #    H=DirectGraph(G)
     #    try:
     #        n=nx.average_shortest_path_length(H)
@@ -266,7 +266,7 @@ def CreateRadiusGraph(N, r=0.1):
     H = G.to_directed()
     listed = H.edges()
     k = 0
-    for i in xrange(len(listed) / 2):
+    for i in range(len(listed) / 2):
         while listed:
             if (listed[k][1], listed[k][0]) in H.edges():
                 if rnd.random() < 0.5:
@@ -280,10 +280,10 @@ def CreateRadiusGraph(N, r=0.1):
 
     try:
         n = nx.average_shortest_path_length(H)
-        print "Average Shortest Path : ", n
+        print("Average Shortest Path : ", n)
     except nx.NetworkXError:
-        print 'Average Shortest Path : Disconnected'
-    print "Clustering Coefficient ", nx.average_clustering(G)
+        print('Average Shortest Path : Disconnected')
+    print("Clustering Coefficient ", nx.average_clustering(G))
     return H
 
 
@@ -313,29 +313,29 @@ def PlotRaster(LS, ts, reo=1):
     N = len(LS)
 
     #   retrive the spike of each cell splitting into excitatory and inhibitory
-    for i in xrange(N):
+    for i in range(N):
         if LS[i].ID_syn.rfind('EXC'):
             tmpe.append(np.array(LS[i].record['spk']))
         else:
             tmpi.append(np.array(LS[i].record['spk']))
     if reo == 1:
         #   reordering of the vector
-        for i in xrange(N):
+        for i in range(N):
             if i < len(tmpe):
                 spike.append(tmpe[i])
             if i == len(tmpe):
-                print ts
+                print(ts)
                 spike.append([0, ts])
             if i > len(tmpe):
                 spike.append(tmpi[i - len(tmpe)])
     else:
         CellPos = {}
         NCells = len(LS)
-        for i in xrange(NCells):
+        for i in range(NCells):
             # check if it is possible to color differently exc/inh neurons ?!
-            CellPos[i] = np.array(LS[i].pos.values())
-        index = sorted(range(NCells), key=lambda k: CellPos[k][1])
-        for i in xrange(NCells):
+            CellPos[i] = np.array(list(LS[i].pos.values()))
+        index = sorted(list(range(NCells)), key=lambda k: CellPos[k][1])
+        for i in range(NCells):
             spike.append(np.array(LS[index[i]].record['spk']))
 
     # generating the plot
@@ -408,8 +408,8 @@ def draw_node(G, node=0):
     nx.draw_networkx_edges(G, pos=pos, alpha=.05, edge_color='k')
     nx.draw_networkx_edges(G, pos=pos, alpha=.8, edge_color='r', edgelist=G.in_edges(node), width=2)
     nx.draw_networkx_edges(G, pos=pos, alpha=.8, edge_color='g', edgelist=G.out_edges(node), width=2)
-    plt.xlim([0, np.max(pos.values())])
-    plt.ylim([0, np.max(pos.values())])
+    plt.xlim([0, np.max(list(pos.values()))])
+    plt.ylim([0, np.max(list(pos.values()))])
 
 
 def random_geometric_gauss2(N, dim=2, sigma=1, grad=0, torus=0):
@@ -436,16 +436,16 @@ def random_geometric_gauss2(N, dim=2, sigma=1, grad=0, torus=0):
     """
     G = nx.Graph()
     G.name = "Random Geometric Graph"
-    G.add_nodes_from(range(N))
+    G.add_nodes_from(list(range(N)))
 
     #   sample node position uniformly
     for n in G:
         G.node[n]['pos'] = rnd.random(dim)
     if dim == 3:
-        for n in xrange(len(G.nodes())):
+        for n in range(len(G.nodes())):
             G.node[n]['pos'][2] = (1 - G.node[n]['pos'][2] ** grad) * .25
     start = time.time()
-    pos = np.asarray(nx.get_node_attributes(G, 'pos').values())
+    pos = np.asarray(list(nx.get_node_attributes(G, 'pos').values()))
 
     if torus:
         Dmat = squareform(pdist(pos, metric=lambda x, y: (
@@ -453,15 +453,15 @@ def random_geometric_gauss2(N, dim=2, sigma=1, grad=0, torus=0):
                                                                        abs(x[1] - y[1])) ** 2)))
     else:
         Dmat = squareform(pdist(pos, 'sqeuclidean'))
-    print '%d s' % (time.time() - start)
+    print('%d s' % (time.time() - start))
     Dmat = scipy.stats.chi2(1).cdf(Dmat / sigma)
     Dmat += np.eye(len(Dmat)) * 10
-    print '%d s' % (time.time() - start)
+    print('%d s' % (time.time() - start))
     Pmat = np.random.random(Dmat.shape)
-    print '%d s' % (time.time() - start)
+    print('%d s' % (time.time() - start))
 
     edges = np.where(Dmat - Pmat < 0.0)
-    print '%d s' % (time.time() - start)
+    print('%d s' % (time.time() - start))
     #    G.add_edges_from()
 
-    return G, zip(*edges)
+    return G, list(zip(*edges))

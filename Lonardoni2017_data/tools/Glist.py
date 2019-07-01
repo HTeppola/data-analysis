@@ -32,9 +32,9 @@ def worker(work_queue, w, index, folder):
                 #            print ">>>>>>>>>>>>>>>>> JOB %03d load: (%03d,%03d) -> %07d nodes"%(maps[0],out[1],out[2],out[1]*out[2])
                 #        done_queue.put([maps[1],maps[2],out[0]])
         else:
-            print "already processed: %s" % (folder + '/%s_%s.npy' % (maps[0], maps[1]))
+            print("already processed: %s" % (folder + '/%s_%s.npy' % (maps[0], maps[1])))
         if work_queue.empty():
-            print "CPU:%02d process %03d" % (w, maps[0]), "of", index, "\t elapsed: %0ds" % (time.time() - start)
+            print("CPU:%02d process %03d" % (w, maps[0]), "of", index, "\t elapsed: %0ds" % (time.time() - start))
             #        print 'process id:', os.getpid()
             #        print "queuesize %d"%(work_queue.qsize())
             #        print "=========================================="
@@ -54,8 +54,8 @@ def run_all_common(Glist, n_wor=25, gain=3):
     N = len(Glist)
     index = 0
     mapping = []
-    for i in xrange(0, N):
-        for j in xrange(0, N):
+    for i in range(0, N):
+        for j in range(0, N):
             if not i == j:
                 mapping.append((i, j))
                 #                print i,j,len(Glist[i]),len(Glist[j])
@@ -66,31 +66,31 @@ def run_all_common(Glist, n_wor=25, gain=3):
     while len(mapping) > 0:
         time.sleep(1)
 
-        print "#######################################"
-        print "################# iteration", counter, "e", time.time() - start
-        print "#######################################"
+        print("#######################################")
+        print("################# iteration", counter, "e", time.time() - start)
+        print("#######################################")
         start = time.time()
         work_queue = Queue()
 
         processes = []
 
-        for k in xrange(int(workers * gain)):
+        for k in range(int(workers * gain)):
             if len(mapping) == 0:
                 break
             match = mapping.pop()
             #                print match
             work_queue.put((match[0], match[1]))
             if work_queue.full():
-                print "QUEUE IS FULL"
-                print "QUEUE IS FULL"
-                print "QUEUE IS FULL"
-                print "QUEUE IS FULL"
+                print("QUEUE IS FULL")
+                print("QUEUE IS FULL")
+                print("QUEUE IS FULL")
+                print("QUEUE IS FULL")
 
                 time.sleep(20)
 
         jj = 0
 
-        for w in xrange(workers):
+        for w in range(workers):
             p = Process(target=worker, args=(work_queue, w, index, folder))
             jj += 1
             p.start()
@@ -267,7 +267,7 @@ def clique_removal2(group1, group2):
                 #    print "------------------------------------------ MC",mc,counter
                 #    print "compression:", lenc,"->",len(filtered)
     if ISO:
-        print "CHECK ISO:", not lenc - isolates, isolates, time.time() - start, lenc, isolates
+        print("CHECK ISO:", not lenc - isolates, isolates, time.time() - start, lenc, isolates)
 
     return filtered, l1, l2
 
@@ -360,7 +360,7 @@ def clique_removal3(group1, group2):
 
     cc = 0
     while len(isets) > 0:
-        print isets
+        print(isets)
         cc += 1
         ele = isets.pop()
         map2 = [item[1] for item in list(ele)]

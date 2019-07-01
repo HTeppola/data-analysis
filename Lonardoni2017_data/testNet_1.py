@@ -1,12 +1,15 @@
 __author__ = 'dlonardoni'
 
+import matplotlib as m
+m.use('Qt5Agg')
+
 import pylab as plt
 import cellCultureNet as Net
 from tools import tools
 import pickle
 import numpy as np
 G=pickle.load(open("savedGraph/4fgauss_0.005_1024_1_.graph"))
-G=G.subgraph(range(20))
+G=G.subgraph(list(range(20)))
 ifNMDA=0
 magnitude=0.08
 mAMPA=1
@@ -39,7 +42,7 @@ np.save(open('Results/'+groupname+'/Spike/'+sname+'_STIM.npy', 'w'),spikelist)
 
 
 
-clist=np.load('Results/'+groupname+'/Spike/'+sname+'.npy')
+clist=np.load('Results/'+groupname+'/Spike/'+sname+'.npy', allow_pickle=True)
 
 for cell in clist[1:]:
     plt.plot(cell['spikes'],np.ones_like(cell['spikes'])*cell['ID'],'ok')

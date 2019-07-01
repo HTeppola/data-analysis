@@ -10,7 +10,7 @@ import numpy as np
 G=ut.crop_graph(pickle.load(open("savedGraph/4fgauss_0.005_1024_1_.graph")),.5)
 
 pos=nx.get_node_attributes(G,'pos')
-G=G.subgraph([key for key,value in pos.iteritems() if value[0]<1.3 and value[1]<1.3])
+G=G.subgraph([key for key,value in pos.items() if value[0]<1.3 and value[1]<1.3])
 G=nx.relabel_nodes(G,{idx:i for i,idx in enumerate(G.nodes())})
 pAMPA = 2
 ifNMDA = 1
@@ -28,7 +28,7 @@ RPESO=16
 U=.5
 PINH=.2
 MODIFIER=0
-for index in xrange(1):
+for index in range(1):
     sigma=.005
     ts=1000 * 300
 
@@ -73,13 +73,13 @@ for index in xrange(1):
     tmp = tools.convert2xN(clist[1:])
     for idx in np.unique(tmp[0]):
         spkCount=len(clist[idx + 1]['spikes'])
-        print idx, clist[idx + 1]['type'], spkCount, spkCount*1000./Net.h.t
+        print(idx, clist[idx + 1]['type'], spkCount, spkCount*1000./Net.h.t)
     plt.figure()
     NCells=5
     axV = plt.subplot(NCells, 3, 1)
     axG = plt.subplot(NCells, 3, 2)
     axI = plt.subplot(NCells, 3, 3)
-    for i in xrange(NCells):
+    for i in range(NCells):
         plt.subplot(NCells, 3, 3 * i + 1,sharex=axV)
         ut.PlotVoltage(Net.CellList[i])
         plt.subplot(NCells, 3, 3 * i + 2,sharex=axG)

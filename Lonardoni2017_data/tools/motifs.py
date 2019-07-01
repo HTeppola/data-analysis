@@ -19,7 +19,7 @@ def partition(G):
     allnodes = []
     for com in set(parts.values()):
         count += 1.
-        list_nodes = [nodes for nodes in parts.keys()
+        list_nodes = [nodes for nodes in list(parts.keys())
                       if parts[nodes] == com]
         allnodes.append(list_nodes)
         plt.plot(G.node[list_nodes[0]]['pos'][0], G.node[list_nodes[0]]['pos'][1], 'o',
@@ -31,14 +31,14 @@ def partition(G):
         nx.draw_networkx_edges(G.subgraph(list_nodes), poss, alpha=0.5)
 
     # plt.legend()
-    print "# communities", count
+    print("# communities", count)
     return allnodes
 
 
 def reorder_motifs():
     import pickle
     motifs = pickle.load(open('/home/alonardoni/8192correlation/motifs_DB/motifs_DB_new_new.npy'))
-    index = np.array(sorted(range(len(motifs)), key=lambda k: len(motifs[k][1].nodes())))
+    index = np.array(sorted(list(range(len(motifs))), key=lambda k: len(motifs[k][1].nodes())))
     motifs = np.array(motifs)[index]
     i = 0
     for ele in motifs:
@@ -81,7 +81,7 @@ def motif_hist(test_CC, ax1=0, ax2=0, show_plot=True):
             ax1 = fig.add_axes([0.1, 0.1, 0.85, 0.15])
             ax2 = fig.add_axes([0.1, 0.3, 0.85, 0.6])
 
-    n_groups = len(test_CC[test_CC.keys()[0]])
+    n_groups = len(test_CC[list(test_CC.keys())[0]])
     bar_width = 0.8 / len(test_CC)
     index = []
     normalizer = np.ones(20)
@@ -90,7 +90,7 @@ def motif_hist(test_CC, ax1=0, ax2=0, show_plot=True):
         for ele in test_CC[i]:
             normalizer[len(ele[1].nodes())] += ele[2]
             # print "--------------------->",i,len(test_CC[i]),n_groups
-        index = np.array([test_CC[i][k][0] for k in xrange(n_groups)])
+        index = np.array([test_CC[i][k][0] for k in range(n_groups)])
         # test_CC[i][2][2]=test_CC[i][2][2]-test_CC[i][1][2]
 
         kol[i] = [count[2] * 1. / normalizer[len(count[1].nodes())] for count in test_CC[i]]
@@ -108,7 +108,7 @@ def motif_hist(test_CC, ax1=0, ax2=0, show_plot=True):
                 graph_comm += 1
 
     if show_plot:
-        for i in xrange(n_groups):
+        for i in range(n_groups):
             tmppos = {}
             N = test_CC[0][i][1].nodes()
             k = 0
@@ -134,12 +134,12 @@ def motif_hist(test_CC, ax1=0, ax2=0, show_plot=True):
     else:
         comp = len(normalizer) - sum(np.array(normalizer) == 1)
     # print comp
-    pvm = np.zeros((len(test_CC.keys()) - 1, len(test_CC.keys()) - 1))
+    pvm = np.zeros((len(list(test_CC.keys())) - 1, len(list(test_CC.keys())) - 1))
 
     if 0:
         control = np.array(kol['graph']) * 1. / comp
-        for i in test_CC.keys():
-            for j in test_CC.keys():
+        for i in list(test_CC.keys()):
+            for j in list(test_CC.keys()):
                 if i != 'graph' and j != 'graph' and i != j:
                     pvm[i, j] = \
                         ks_2samp(np.cumsum(np.array(kol[i])) * 1. / comp, np.cumsum(np.array(kol[j])) * 1. / comp)[1]
@@ -151,16 +151,16 @@ def motif_hist(test_CC, ax1=0, ax2=0, show_plot=True):
                     #                    print i,j,":",pvm[i,j],chisquare(kol[i],kol[j])
         pdiff_index = np.zeros(len(test_CC[0]))
         ndiff_index = np.zeros(len(test_CC[0]))
-        for i in test_CC.keys():
+        for i in list(test_CC.keys()):
             if i != 'graph':
-                print "i: ", i, "vs control\t p-value:", \
-                    ks_2samp(np.cumsum(np.array(kol[i])) * 1. / comp, np.cumsum(control))[1]
+                print("i: ", i, "vs control\t p-value:", \
+                    ks_2samp(np.cumsum(np.array(kol[i])) * 1. / comp, np.cumsum(control))[1])
             if i == 'graph':
                 plt.plot(np.cumsum(control) + 2, 'r', lw=2, label='all_graph')
             else:
                 plt.plot(np.cumsum(kol[i]) * 1. / comp + 2, 'b', lw=2, label='%s-th component' % i)
                 diff = np.array(kol[i]) * 1. / comp - control
-                for k in xrange(len(kol[i])):
+                for k in range(len(kol[i])):
                     if abs(diff[k]) > 0.5 * control[k]:
                         if diff[k] > 0:
                             pdiff_index[k] += 1
@@ -168,8 +168,8 @@ def motif_hist(test_CC, ax1=0, ax2=0, show_plot=True):
                             ndiff_index[k] += -1
                             # print ndiff_index[k]
         # print sum(ndiff_index)
-        plt.bar(np.arange(len(pdiff_index)), pdiff_index * 1. / (len(test_CC.keys()) - 1), edgecolor='b')
-        plt.bar(np.arange(len(ndiff_index)), ndiff_index * 1. / (len(test_CC.keys()) - 1), edgecolor='r', color='r')
+        plt.bar(np.arange(len(pdiff_index)), pdiff_index * 1. / (len(list(test_CC.keys())) - 1), edgecolor='b')
+        plt.bar(np.arange(len(ndiff_index)), ndiff_index * 1. / (len(list(test_CC.keys())) - 1), edgecolor='r', color='r')
 
         plt.ylabel('# of nodes')
         plt.xlabel('motif ID')
@@ -180,7 +180,7 @@ def motif_hist(test_CC, ax1=0, ax2=0, show_plot=True):
             plt.matshow(pvm)
             plt.colorbar()
 
-        for k in xrange(len(pdiff_index)):
+        for k in range(len(pdiff_index)):
             tmppos = {}
             N = test_CC[0][i][1].nodes()
             k = 0
@@ -230,7 +230,7 @@ def motif_counts(tau, base, base_direction=False, mymotifs=True):
             A = nx.adj_matrix(ubase)
             A3 = A.dot(A).dot(A)
             triangles = 0
-            for i in xrange(A3.shape[0]):
+            for i in range(A3.shape[0]):
                 triangles += A3[i, i]
 
             motif_counts[index] = (index, motif_counts[index][1], triangles / 6)
@@ -310,7 +310,7 @@ def get_motifs(tau, directed_motifs):
     """
     motifs = list()
     motif_index = 0
-    for v in xrange(2, tau + 1):
+    for v in range(2, tau + 1):
         graphs = all_graphs(v, directed_motifs)
         for g in graphs:
             motifs.append((motif_index, g, 0))
@@ -323,7 +323,7 @@ def smart_graphs(num_nodes):
     g = nx.Graph()
     g.add_edge(0, 1)
     graphs.append(g)
-    for i in xrange(3, num_nodes + 1):
+    for i in range(3, num_nodes + 1):
         graphs = recursive_worker(graphs, i)
 
     return graphs
@@ -450,7 +450,7 @@ graphs : A list of all possible single component graphs given some number of nod
 
 def testdict():
     a = dict()
-    for count in xrange(4):
+    for count in range(4):
         a[count] = count
 
 
@@ -461,14 +461,14 @@ def motif_communities(H, th_motif=7):
     refined_components = [H.nodes()]
     for allpoints in refined_components:
         if len(allpoints) > 5:
-            print "count", count, "# nodes --------------------->", len(allpoints)
-            print "count", count, "# edges --------------------->", len(H.subgraph(allpoints).edges())
-            print "price to pay", len(H.subgraph(allpoints).edges()) * 1. / len(
-                nx.complete_graph(len(allpoints)).edges())
+            print("count", count, "# nodes --------------------->", len(allpoints))
+            print("count", count, "# edges --------------------->", len(H.subgraph(allpoints).edges()))
+            print("price to pay", len(H.subgraph(allpoints).edges()) * 1. / len(
+                nx.complete_graph(len(allpoints)).edges()))
             test_CC[count] = mp2.motif_main(th_motif, H.subgraph(allpoints), count)
             count += 1
         else:
-            print "---- !SKIPPED! ----- "
+            print("---- !SKIPPED! ----- ")
     return test_CC
 
 
@@ -484,7 +484,7 @@ def clustering_hist(test_CC, ax1=0, ax2=0, show_plot=True):
             ax1 = fig.add_axes([0.1, 0.1, 0.85, 0.15])
             ax2 = fig.add_axes([0.1, 0.3, 0.85, 0.6])
 
-    n_groups = len(test_CC[test_CC.keys()[0]])
+    n_groups = len(test_CC[list(test_CC.keys())[0]])
     bar_width = 0.8 / len(test_CC) / 2
     index_nodes = np.ones(20)
     index = np.ones(20)
@@ -493,7 +493,7 @@ def clustering_hist(test_CC, ax1=0, ax2=0, show_plot=True):
         for ele in test_CC[i]:
             normalizer[len(ele[1].nodes())] += ele[2]
             # print i,"--------------------->",i,len(test_CC[i]),n_groups
-        index = np.array([test_CC[i][k][0] for k in xrange(n_groups)])
+        index = np.array([test_CC[i][k][0] for k in range(n_groups)])
         # test_CC[i][2][2]=test_CC[i][2][2]-test_CC[i][1][2]
 
         kol[i] = [count[2] * 1. / normalizer[len(count[1].nodes())] for count in test_CC[i]]
@@ -503,7 +503,7 @@ def clustering_hist(test_CC, ax1=0, ax2=0, show_plot=True):
         # print max(index_nodes)
         clustered_hist = np.zeros(max(index_nodes))
         path_hist = np.zeros(max(index_nodes))
-        for j in xrange(max(index_nodes)):
+        for j in range(max(index_nodes)):
             tmp2 = tmp[index_nodes == j]
             clu_co = np.array([nx.average_clustering(count[1]) for count in test_CC[i] if index_nodes[count[0]] == j])
             clustered_hist[j] = sum(tmp2[clu_co > cl_th])
@@ -526,7 +526,7 @@ def clustering_hist(test_CC, ax1=0, ax2=0, show_plot=True):
     ax2.set_xlim([2, max(index_nodes) + 2])
     if show_plot:
         kk = 0
-        for i in xrange(n_groups):
+        for i in range(n_groups):
 
             if nx.average_clustering(test_CC[0][i][1]) < cl_th:
                 kk += 1

@@ -1,5 +1,6 @@
-/* Created by Language version: 6.2.0 */
+/* Created by Language version: 7.7.0 */
 /* NOT VECTORIZED */
+#define NRN_VECTORIZED 0
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -21,10 +22,19 @@ extern int _method3;
 extern double hoc_Exp(double);
 #endif
  
-#define _threadargscomma_ /**/
-#define _threadargs_ /**/
+#define nrn_init _nrn_init__SpikeGenerator
+#define _nrn_initial _nrn_initial__SpikeGenerator
+#define nrn_cur _nrn_cur__SpikeGenerator
+#define _nrn_current _nrn_current__SpikeGenerator
+#define nrn_jacob _nrn_jacob__SpikeGenerator
+#define nrn_state _nrn_state__SpikeGenerator
+#define _net_receive _net_receive__SpikeGenerator 
+#define event_time event_time__SpikeGenerator 
+#define seed seed__SpikeGenerator 
  
+#define _threadargscomma_ /**/
 #define _threadargsprotocomma_ /**/
+#define _threadargs_ /**/
 #define _threadargsproto_ /**/
  	/*SUPPRESS 761*/
 	/*SUPPRESS 762*/
@@ -77,6 +87,15 @@ extern void hoc_register_limits(int, HocParmLimits*);
 extern void hoc_register_units(int, HocParmUnits*);
 extern void nrn_promote(Prop*, int, int);
 extern Memb_func* memb_func;
+ 
+#define NMODL_TEXT 1
+#if NMODL_TEXT
+static const char* nmodl_file_text;
+static const char* nmodl_filename;
+extern void hoc_reg_nmodl_text(int, const char*);
+extern void hoc_reg_nmodl_filename(int, const char*);
+#endif
+
  extern Prop* nrn_point_prop_;
  static int _pointtype;
  static void* _hoc_create_pnt(_ho) Object* _ho; { void* create_point_process();
@@ -144,7 +163,7 @@ static void nrn_state(_NrnThread*, _Memb_list*, int);
 }
  /* connect range variables in _p that hoc is supposed to know about */
  static const char *_mechanism[] = {
- "6.2.0",
+ "7.7.0",
 "SpikeGenerator",
  "fast_invl",
  "slow_invl",
@@ -193,7 +212,7 @@ static void nrn_alloc(Prop* _prop) {
 #define _tqitem &(_ppvar[2]._pvoid)
  static void _net_receive(Point_process*, double*, double);
  extern Symbol* hoc_lookup(const char*);
-extern void _nrn_thread_reg(int, int, void(*f)(Datum*));
+extern void _nrn_thread_reg(int, int, void(*)(Datum*));
 extern void _nrn_thread_table_reg(int, void(*)(double*, Datum*, Datum*, _NrnThread*, int));
 extern void hoc_register_tolerance(int, HocStateTolerance*, Symbol***);
 extern void _cvode_abstol( Symbol**, double*, int);
@@ -207,12 +226,19 @@ extern void _cvode_abstol( Symbol**, double*, int);
 	 _hoc_create_pnt, _hoc_destroy_pnt, _member_func);
  _mechtype = nrn_get_mechtype(_mechanism[1]);
      _nrn_setdata_reg(_mechtype, _setdata);
-  hoc_register_dparam_size(_mechtype, 3);
+ #if NMODL_TEXT
+  hoc_reg_nmodl_text(_mechtype, nmodl_file_text);
+  hoc_reg_nmodl_filename(_mechtype, nmodl_filename);
+#endif
+  hoc_register_prop_size(_mechtype, 15, 3);
+  hoc_register_dparam_semantics(_mechtype, 0, "area");
+  hoc_register_dparam_semantics(_mechtype, 1, "pntproc");
+  hoc_register_dparam_semantics(_mechtype, 2, "netsend");
  add_nrn_has_net_event(_mechtype);
  pnt_receive[_mechtype] = _net_receive;
  pnt_receive_size[_mechtype] = 1;
  	hoc_register_var(hoc_scdoub, hoc_vdoub, hoc_intfunc);
- 	ivoc_help("help ?1 SpikeGenerator /home/alonardoni/PLoScode/x86_64/pregen.mod\n");
+ 	ivoc_help("help ?1 SpikeGenerator /u/cliffk/neuro/okinawa/heidi/project/Lonardoni2017_data/x86_64/pregen.mod\n");
  hoc_register_limits(_mechtype, _hoc_parm_limits);
  hoc_register_units(_mechtype, _hoc_parm_units);
  }
@@ -351,8 +377,7 @@ static double _nrn_current(double _v){double _current=0.;v=_v;{
 }
 
 static void nrn_state(_NrnThread* _nt, _Memb_list* _ml, int _type){
- double _break, _save;
-Node *_nd; double _v; int* _ni; int _iml, _cntml;
+Node *_nd; double _v = 0.0; int* _ni; int _iml, _cntml;
 #if CACHEVEC
     _ni = _ml->_nodeindices;
 #endif
@@ -369,7 +394,6 @@ for (_iml = 0; _iml < _cntml; ++_iml) {
     _nd = _ml->_nodelist[_iml];
     _v = NODEV(_nd);
   }
- _break = t + .5*dt; _save = t;
  v=_v;
 {
 }}
@@ -383,3 +407,137 @@ static void _initlists() {
   if (!_first) return;
 _first = 0;
 }
+
+#if NMODL_TEXT
+static const char* nmodl_filename = "/u/cliffk/neuro/okinawa/heidi/project/Lonardoni2017_data/nrnMod/pregen.mod";
+static const char* nmodl_file_text = 
+  ": $Id: pregen.mod,v 1.3 2000/05/16 11:16:56 hines Exp $\n"
+  ": comments at end\n"
+  "\n"
+  "NEURON	{\n"
+  "  POINT_PROCESS SpikeGenerator\n"
+  "  RANGE y\n"
+  "  RANGE fast_invl, slow_invl, burst_len, start, end,delay\n"
+  "  RANGE noise\n"
+  "}\n"
+  "\n"
+  "PARAMETER {\n"
+  "	fast_invl	= 10 (ms)	: time between spikes in a burst (msec)\n"
+  "	slow_invl	= 0 (ms)	: burst period (msec)\n"
+  ": actually, above is interburst period in conformity with original version\n"
+  ": see\n"
+  "	burst_len	= 10		: burst length (# spikes)\n"
+  "	start		= 25 (ms)	: start of first interburst interval\n"
+  "	end		= 1e10 (ms)	: time to stop bursting\n"
+  "	noise		= 0.3		: amount of randomeaness (0.0 - 1.0)\n"
+  "	delay		= 4\n"
+  "}\n"
+  "\n"
+  "ASSIGNED {\n"
+  "	y\n"
+  "	burst\n"
+  "	event (ms)\n"
+  "	burst_off (ms)\n"
+  "	burst_on (ms)\n"
+  "	toff (ms)\n"
+  "	on\n"
+  "}\n"
+  "\n"
+  "PROCEDURE seed(x) {\n"
+  "	set_seed(x)\n"
+  "}\n"
+  "\n"
+  "INITIAL {\n"
+  "    :printf(\"start=%g\\n\",start)\n"
+  "	on = 1\n"
+  "	toff = 1e9\n"
+  "	y = -90\n"
+  "	burst = 0\n"
+  "	event = start - slow_invl\n"
+  "   	:printf(\"prevent t=%g, start=%g\\n\",event,start)\n"
+  "    event_time()\n"
+  "   	:printf(\"prevent t=%g\\n\",event)\n"
+  "    while (on == 1 && event < 0) {\n"
+  "		event_time()\n"
+  "	}\n"
+  "\n"
+  "	if (on == 1) {\n"
+  "		net_send(event, 1)\n"
+  "		:printf(\"spike sent\\n\")\n"
+  "	}\n"
+  "}\n"
+  "\n"
+  "FUNCTION interval(mean (ms)) (ms) {\n"
+  "	if (mean <= 0.) {\n"
+  "		mean = .01 (ms) : I would worry if it were 0.\n"
+  "		: since mean is a local variable, if the number it is set\n"
+  "		: to is dimensionless, mean will be dimensionless.\n"
+  "	}\n"
+  "	if (noise == 0) {\n"
+  "		interval = mean\n"
+  "	}else{\n"
+  "		interval = (1. - noise)*mean + noise*(mean*exprand(1)+delay) : (delay+noise*mean*exprand(1))\n"
+  "	}\n"
+  "}\n"
+  "\n"
+  "PROCEDURE event_time() {\n"
+  "	if (slow_invl == 0 || (burst != 0. && burst_len > 1)) {\n"
+  "		event = event + interval(fast_invl)\n"
+  "		:printf(\"primo if %g\\n\",event)\n"
+  "		if (event > burst_on + burst_off) {\n"
+  "			burst = 0.\n"
+  "		}\n"
+  "	}else{\n"
+  "		burst = 1.\n"
+  ": if slow_invl from beginning of burst to beginning of burst\n"
+  ":		event = event + interval(slow_invl - (burst_len-1)*fast_invl)\n"
+  ": use following if slow_invl is interburst interval\n"
+  "		event = event + interval(slow_invl)\n"
+  "		:printf(\"secondo if %g\\n\", event)\n"
+  "		burst_on = event\n"
+  "		burst_off = interval((burst_len - 1)*fast_invl)-1e-6\n"
+  "	}\n"
+  "	if (event > end) {\n"
+  "		on = 0\n"
+  "	}\n"
+  "}\n"
+  "\n"
+  "NET_RECEIVE (w) {\n"
+  "    :printf(\"Pregen receive t=%g flag=%g\\n\", t, flag)\n"
+  "	if (flag == 1 && on == 1) {\n"
+  "		y = 20\n"
+  "		net_event(t)\n"
+  "		event_time()\n"
+  "		:printf(\"spike sent\\n\")\n"
+  "		net_send(event - t, 1)\n"
+  "		net_send(.1, 2)\n"
+  "	}\n"
+  "	if (flag == 2) {\n"
+  "		y = -90\n"
+  "	}\n"
+  "}\n"
+  "\n"
+  "COMMENT\n"
+  "Presynaptic spike generator\n"
+  "---------------------------\n"
+  "\n"
+  "This mechanism has been written to be able to use synapses in a single\n"
+  "neuron receiving various types of presynaptic trains.  This is a \"fake\"\n"
+  "presynaptic compartment containing a fast spike generator.  The trains\n"
+  "of spikes can be either periodic or noisy (Poisson-distributed), and\n"
+  "either tonic or bursting.\n"
+  "\n"
+  "Parameters;\n"
+  "   noise: 	between 0 (no noise-periodic) and 1 (fully noisy)\n"
+  "   fast_invl: 	fast interval, mean time between spikes (ms)\n"
+  "   slow_invl:	slow interval, mean burst silent period (ms), 0=tonic train\n"
+  "   burst_len: 	mean burst length (nb. spikes)\n"
+  "\n"
+  "Written by Z. Mainen, modified by A. Destexhe, The Salk Institute\n"
+  "\n"
+  "Modified by Michael Hines for use with CVode\n"
+  "\n"
+  "Modified by Michael Hines to use logical event style with NET_RECEIVE\n"
+  "ENDCOMMENT\n"
+  ;
+#endif

@@ -2,7 +2,7 @@ __author__ = 'dlonardoni'
 from numpy import *  # instead use import numpy as np
 import numpy as np
 from scipy import io
-from string import atoi
+# from string import atoi
 # from neuronpy.util.spiketrain import *
 # from utility import flatlist,filepath
 import os
@@ -56,20 +56,20 @@ def LoadSpikeTrains(filename, ReadHeader=True):
             dt = 1000 / daktum['SamplingFrequency'][0][0]
             TotalRecordingTime = daktum['StopFrame'][0][0] * dt / 1000.0
         except:
-            print "Header information is missing in ", filename
-            print "The global parameters:",
-            print "TotalRecordingTime= ", TotalRecordingTime, " [seconds]",
-            print "dt= ", dt, " [ms]",
-            print "will therefore be adopted."
+            print("Header information is missing in ", filename)
+            print("The global parameters:", end=' ')
+            print("TotalRecordingTime= ", TotalRecordingTime, " [seconds]", end=' ')
+            print("dt= ", dt, " [ms]", end=' ')
+            print("will therefore be adopted.")
 
-    for channel in daktum.keys():
+    for channel in list(daktum.keys()):
         pos = channel.rfind('_')
         if (pos > 0) & (channel[0] == 'C'):
             if size(daktum[channel]):
                 tk = daktum[channel].indices * dt
                 mfr = len(tk) / float(TotalRecordingTime)
                 if (mfr > mfrMin) & (mfr < mfrMax):
-                    ch = {'spikes': tk, 'x': atoi(channel[2:pos]), 'y': atoi(channel[pos + 1:])}
+                    ch = {'spikes': tk, 'x': int(channel[2:pos]), 'y': int(channel[pos + 1:])}
                     SpkList.append(ch)
 
     return SpkList
@@ -85,7 +85,7 @@ def LoadSpikeTrains2(pathFolder='', filename='peakTrain_%d_%d', Tmax=600.0):
     SpkList = []
     HVc = arange(1, RowChanMax + 1)  # range of H/V channels
     # ***********************
-    print "This procedure still needs to be updated coherently to LoadSpikeTrains such to read dt,Tmax from mat file!!"
+    print("This procedure still needs to be updated coherently to LoadSpikeTrains such to read dt,Tmax from mat file!!")
     # ***********************
     for x in HVc:
         for y in HVc:
@@ -163,7 +163,7 @@ def SpikeStatistics(spikes, TimeWindow=600.0, ISImax=100, spkMin=5, ISIhistMax=5
     isiXhist = arange(ISIhistMin, ISIhistMax + ISIhistDT, ISIhistDT)
     isiAll = []
     ele = -1
-    if PrintMessages: print "Duration of recording set to ", TimeWindow, " seconds"
+    if PrintMessages: print("Duration of recording set to ", TimeWindow, " seconds")
     for indST in spikes_unique:
         ele += 1
         indOfST = spikes[0, :] == indST  # indexes of the spikes
@@ -180,7 +180,7 @@ def SpikeStatistics(spikes, TimeWindow=600.0, ISImax=100, spkMin=5, ISIhistMax=5
         numburst = 0
         burdurTotTime = 0
         numspikes_burst = 0
-        for k in xrange(LindISI):
+        for k in range(LindISI):
             iend = indISI[k]
             nspkburst = (iend - ibegin + 1)
             if nspkburst >= spkMin:
@@ -249,22 +249,22 @@ def ShowSpkStat(out):
     N = len(mfr)  # note: only active channels are considered i.e. with mfr in [mfrMin,mfrMax]
     sN = np.sqrt(N)
     if PrintMessages:
-        print "#active-electrodes   MFR(Hz) SEM  MBR(#burst/min) SEM     MFIB(Hz) SEM     MBD(ms) SEM  random-spikes(%)"
+        print("#active-electrodes   MFR(Hz) SEM  MBR(#burst/min) SEM     MFIB(Hz) SEM     MBD(ms) SEM  random-spikes(%)")
     # number of active electrodes
-    if PrintMessages: print N, "\t",
+    if PrintMessages: print(N, "\t", end=' ')
     # MFR
     mfr_S = np.asarray([np.mean(mfr), np.std(mfr) / sN])
 
-    if PrintMessages: print "%5.4f %5.4f " % (mfr_S[0], mfr_S[1]), "\t",  # - burst analysis
+    if PrintMessages: print("%5.4f %5.4f " % (mfr_S[0], mfr_S[1]), "\t", end=' ')  # - burst analysis
     # MBR
     iG = mbr >= mbrMin
     sG = np.sum(iG)
     mbr_S = np.asarray([np.mean(mbr[iG]), np.std(mbr[iG]) / sG])
-    if PrintMessages: print "%5.4g %5.4g " % (mbr_S[0], mbr_S[1]), "\t",  # MFIB
+    if PrintMessages: print("%5.4g %5.4g " % (mbr_S[0], mbr_S[1]), "\t", end=' ')  # MFIB
     mfib_S = np.asarray([np.mean(mfib[iG]), np.std(mfib[iG]) / sG])
-    if PrintMessages: print "%5.4g %5.4g " % (mfib_S[0], mfib_S[1]), "\t",  # MBD
+    if PrintMessages: print("%5.4g %5.4g " % (mfib_S[0], mfib_S[1]), "\t", end=' ')  # MBD
     mbd_S = np.asarray([np.mean(mbd[iG]), np.std(mbd[iG]) / sG])
-    if PrintMessages: print "%5.4g %5.4g " % (mbd_S[0], mbd_S[1]), "\t",  # random spikes
+    if PrintMessages: print("%5.4g %5.4g " % (mbd_S[0], mbd_S[1]), "\t", end=' ')  # random spikes
     randS_S = np.asarray([np.mean(randS), np.std(randS) / sN])
-    if PrintMessages: print "%5.4g %5.4g " % (randS_S[0], randS_S[1])
+    if PrintMessages: print("%5.4g %5.4g " % (randS_S[0], randS_S[1]))
     return mfr_S, mbr_S, mfib_S, mbd_S, randS_S

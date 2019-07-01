@@ -1,5 +1,6 @@
-/* Created by Language version: 6.2.0 */
+/* Created by Language version: 7.7.0 */
 /* VECTORIZED */
+#define NRN_VECTORIZED 1
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -21,10 +22,18 @@ extern int _method3;
 extern double hoc_Exp(double);
 #endif
  
-#define _threadargscomma_ _p, _ppvar, _thread, _nt,
-#define _threadargs_ _p, _ppvar, _thread, _nt
+#define nrn_init _nrn_init__AdExp
+#define _nrn_initial _nrn_initial__AdExp
+#define nrn_cur _nrn_cur__AdExp
+#define _nrn_current _nrn_current__AdExp
+#define nrn_jacob _nrn_jacob__AdExp
+#define nrn_state _nrn_state__AdExp
+#define _net_receive _net_receive__AdExp 
+#define states states__AdExp 
  
+#define _threadargscomma_ _p, _ppvar, _thread, _nt,
 #define _threadargsprotocomma_ double* _p, Datum* _ppvar, Datum* _thread, _NrnThread* _nt,
+#define _threadargs_ _p, _ppvar, _thread, _nt
 #define _threadargsproto_ double* _p, Datum* _ppvar, Datum* _thread, _NrnThread* _nt
  	/*SUPPRESS 761*/
 	/*SUPPRESS 762*/
@@ -112,6 +121,15 @@ extern void hoc_register_limits(int, HocParmLimits*);
 extern void hoc_register_units(int, HocParmUnits*);
 extern void nrn_promote(Prop*, int, int);
 extern Memb_func* memb_func;
+ 
+#define NMODL_TEXT 1
+#if NMODL_TEXT
+static const char* nmodl_file_text;
+static const char* nmodl_filename;
+extern void hoc_reg_nmodl_text(int, const char*);
+extern void hoc_reg_nmodl_filename(int, const char*);
+#endif
+
  extern Prop* nrn_point_prop_;
  static int _pointtype;
  static void* _hoc_create_pnt(_ho) Object* _ho; { void* create_point_process();
@@ -231,9 +249,10 @@ static void _ode_spec(_NrnThread*, _Memb_list*, int);
 static void _ode_matsol(_NrnThread*, _Memb_list*, int);
  
 #define _cvode_ieq _ppvar[5]._i
+ static void _ode_matsol_instance1(_threadargsproto_);
  /* connect range variables in _p that hoc is supposed to know about */
  static const char *_mechanism[] = {
- "6.2.0",
+ "7.7.0",
 "AdExp",
  "num",
  "V_reset",
@@ -338,7 +357,7 @@ static void nrn_alloc(Prop* _prop) {
  static void _thread_mem_init(Datum*);
  static void _thread_cleanup(Datum*);
  extern Symbol* hoc_lookup(const char*);
-extern void _nrn_thread_reg(int, int, void(*f)(Datum*));
+extern void _nrn_thread_reg(int, int, void(*)(Datum*));
 extern void _nrn_thread_table_reg(int, void(*)(double*, Datum*, Datum*, _NrnThread*, int));
 extern void hoc_register_tolerance(int, HocStateTolerance*, Symbol***);
 extern void _cvode_abstol( Symbol**, double*, int);
@@ -356,7 +375,17 @@ extern void _cvode_abstol( Symbol**, double*, int);
      _nrn_setdata_reg(_mechtype, _setdata);
      _nrn_thread_reg(_mechtype, 1, _thread_mem_init);
      _nrn_thread_reg(_mechtype, 0, _thread_cleanup);
-  hoc_register_dparam_size(_mechtype, 6);
+ #if NMODL_TEXT
+  hoc_reg_nmodl_text(_mechtype, nmodl_file_text);
+  hoc_reg_nmodl_filename(_mechtype, nmodl_filename);
+#endif
+  hoc_register_prop_size(_mechtype, 51, 6);
+  hoc_register_dparam_semantics(_mechtype, 0, "area");
+  hoc_register_dparam_semantics(_mechtype, 1, "pntproc");
+  hoc_register_dparam_semantics(_mechtype, 2, "netsend");
+  hoc_register_dparam_semantics(_mechtype, 3, "watch");
+  hoc_register_dparam_semantics(_mechtype, 4, "watch");
+  hoc_register_dparam_semantics(_mechtype, 5, "cvodeieq");
  	hoc_register_cvode(_mechtype, _ode_count, _ode_map, _ode_spec, _ode_matsol);
  	hoc_register_tolerance(_mechtype, _hoc_state_tol, &_atollist);
  add_nrn_has_net_event(_mechtype);
@@ -364,7 +393,7 @@ extern void _cvode_abstol( Symbol**, double*, int);
  pnt_receive_init[_mechtype] = _net_init;
  pnt_receive_size[_mechtype] = 3;
  	hoc_register_var(hoc_scdoub, hoc_vdoub, hoc_intfunc);
- 	ivoc_help("help ?1 AdExp /home/alonardoni/PLoScode/x86_64/AdExp.mod\n");
+ 	ivoc_help("help ?1 AdExp /u/cliffk/neuro/okinawa/heidi/project/Lonardoni2017_data/x86_64/AdExp.mod\n");
  hoc_register_limits(_mechtype, _hoc_parm_limits);
  hoc_register_units(_mechtype, _hoc_parm_units);
  }
@@ -423,8 +452,8 @@ static int _ode_spec1(_threadargsproto_);
  iGABA = - gGABA * ( vv - irev ) ;
  iTotal = - ww + iEXT + iAMPA + iGABA + iNMDA ;
  Dvv = Dvv  / (1. - dt*( (( 1.0 / C * ( - G_l * ( ( vv  + .001) - E_l ) + G_l * Delta_T * exp ( ( ( ( vv  + .001) - V_thre ) ) / Delta_T ) + iTotal ) ) - ( 1.0 / C * ( - G_l * ( vv - E_l ) + G_l * Delta_T * exp ( ( ( vv - V_thre ) ) / Delta_T ) + iTotal )  )) / .001 )) ;
- Dww = Dww  / (1. - dt*( (1.0 / tau_w)*(( ( - 1.0 ) )) )) ;
- return 0;
+ Dww = Dww  / (1. - dt*( ( 1.0 / tau_w )*( ( ( - 1.0 ) ) ) )) ;
+  return 0;
 }
  /*END CVODE*/
  
@@ -481,26 +510,246 @@ static void _net_receive (_pnt, _args, _lflag) Point_process* _pnt; double* _arg
  }
    else if ( _lflag  == 2.0 ) {
      net_event ( _pnt, t ) ;
-     vv = V_reset ;
-     ww = ww + b ;
-     }
+       if (nrn_netrec_state_adjust && !cvode_active_){
+    /* discon state adjustment for general derivimplicit and KINETIC case */
+    int __i, __neq = 8;
+    double __state = vv;
+    double __primary_delta = (V_reset) - __state;
+    double __dtsav = dt;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_dlist1[__i]] = 0.0;
+    }
+    _p[_dlist1[6]] = __primary_delta;
+    dt *= 0.5;
+    v = NODEV(_pnt->node);
+#if NRN_VECTORIZED
+    _thread = _nt->_ml_list[_mechtype]->_thread;
+#endif
+    _ode_matsol_instance1(_threadargs_);
+    dt = __dtsav;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_slist1[__i]] += _p[_dlist1[__i]];
+    }
+  } else {
+ vv = V_reset ;
+       }
+   if (nrn_netrec_state_adjust && !cvode_active_){
+    /* discon state adjustment for general derivimplicit and KINETIC case */
+    int __i, __neq = 8;
+    double __state = ww;
+    double __primary_delta = (ww + b) - __state;
+    double __dtsav = dt;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_dlist1[__i]] = 0.0;
+    }
+    _p[_dlist1[7]] = __primary_delta;
+    dt *= 0.5;
+    v = NODEV(_pnt->node);
+#if NRN_VECTORIZED
+    _thread = _nt->_ml_list[_mechtype]->_thread;
+#endif
+    _ode_matsol_instance1(_threadargs_);
+    dt = __dtsav;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_slist1[__i]] += _p[_dlist1[__i]];
+    }
+  } else {
+ ww = ww + b ;
+       }
+ }
    else if ( _lflag  == 0.0 ) {
      if ( _args[0] > 0.0 ) {
        if ( _args[0] > 1000.0 ) {
-         gEXC = gEXC + rpeso ;
-         gRISEexc = gRISEexc + rpeso ;
-         }
+           if (nrn_netrec_state_adjust && !cvode_active_){
+    /* discon state adjustment for general derivimplicit and KINETIC case */
+    int __i, __neq = 8;
+    double __state = gEXC;
+    double __primary_delta = (gEXC + rpeso) - __state;
+    double __dtsav = dt;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_dlist1[__i]] = 0.0;
+    }
+    _p[_dlist1[4]] = __primary_delta;
+    dt *= 0.5;
+    v = NODEV(_pnt->node);
+#if NRN_VECTORIZED
+    _thread = _nt->_ml_list[_mechtype]->_thread;
+#endif
+    _ode_matsol_instance1(_threadargs_);
+    dt = __dtsav;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_slist1[__i]] += _p[_dlist1[__i]];
+    }
+  } else {
+ gEXC = gEXC + rpeso ;
+           }
+   if (nrn_netrec_state_adjust && !cvode_active_){
+    /* discon state adjustment for general derivimplicit and KINETIC case */
+    int __i, __neq = 8;
+    double __state = gRISEexc;
+    double __primary_delta = (gRISEexc + rpeso) - __state;
+    double __dtsav = dt;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_dlist1[__i]] = 0.0;
+    }
+    _p[_dlist1[2]] = __primary_delta;
+    dt *= 0.5;
+    v = NODEV(_pnt->node);
+#if NRN_VECTORIZED
+    _thread = _nt->_ml_list[_mechtype]->_thread;
+#endif
+    _ode_matsol_instance1(_threadargs_);
+    dt = __dtsav;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_slist1[__i]] += _p[_dlist1[__i]];
+    }
+  } else {
+ gRISEexc = gRISEexc + rpeso ;
+           }
+ }
        else {
-         y1 = y1 + ( _args[0] * ( mNMDA ) ) ;
-         y2 = y2 + ( _args[0] * ( mNMDA ) ) ;
-         gEXC = gEXC + _args[0] * _args[1] * ( mAMPA ) ;
-         gRISEexc = gRISEexc + _args[0] * _args[1] * ( mAMPA ) ;
-         }
+           if (nrn_netrec_state_adjust && !cvode_active_){
+    /* discon state adjustment for general derivimplicit and KINETIC case */
+    int __i, __neq = 8;
+    double __state = y1;
+    double __primary_delta = (y1 + ( _args[0] * ( mNMDA ) )) - __state;
+    double __dtsav = dt;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_dlist1[__i]] = 0.0;
+    }
+    _p[_dlist1[0]] = __primary_delta;
+    dt *= 0.5;
+    v = NODEV(_pnt->node);
+#if NRN_VECTORIZED
+    _thread = _nt->_ml_list[_mechtype]->_thread;
+#endif
+    _ode_matsol_instance1(_threadargs_);
+    dt = __dtsav;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_slist1[__i]] += _p[_dlist1[__i]];
+    }
+  } else {
+ y1 = y1 + ( _args[0] * ( mNMDA ) ) ;
+           }
+   if (nrn_netrec_state_adjust && !cvode_active_){
+    /* discon state adjustment for general derivimplicit and KINETIC case */
+    int __i, __neq = 8;
+    double __state = y2;
+    double __primary_delta = (y2 + ( _args[0] * ( mNMDA ) )) - __state;
+    double __dtsav = dt;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_dlist1[__i]] = 0.0;
+    }
+    _p[_dlist1[1]] = __primary_delta;
+    dt *= 0.5;
+    v = NODEV(_pnt->node);
+#if NRN_VECTORIZED
+    _thread = _nt->_ml_list[_mechtype]->_thread;
+#endif
+    _ode_matsol_instance1(_threadargs_);
+    dt = __dtsav;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_slist1[__i]] += _p[_dlist1[__i]];
+    }
+  } else {
+ y2 = y2 + ( _args[0] * ( mNMDA ) ) ;
+           }
+   if (nrn_netrec_state_adjust && !cvode_active_){
+    /* discon state adjustment for general derivimplicit and KINETIC case */
+    int __i, __neq = 8;
+    double __state = gEXC;
+    double __primary_delta = (gEXC + _args[0] * _args[1] * ( mAMPA )) - __state;
+    double __dtsav = dt;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_dlist1[__i]] = 0.0;
+    }
+    _p[_dlist1[4]] = __primary_delta;
+    dt *= 0.5;
+    v = NODEV(_pnt->node);
+#if NRN_VECTORIZED
+    _thread = _nt->_ml_list[_mechtype]->_thread;
+#endif
+    _ode_matsol_instance1(_threadargs_);
+    dt = __dtsav;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_slist1[__i]] += _p[_dlist1[__i]];
+    }
+  } else {
+ gEXC = gEXC + _args[0] * _args[1] * ( mAMPA ) ;
+           }
+   if (nrn_netrec_state_adjust && !cvode_active_){
+    /* discon state adjustment for general derivimplicit and KINETIC case */
+    int __i, __neq = 8;
+    double __state = gRISEexc;
+    double __primary_delta = (gRISEexc + _args[0] * _args[1] * ( mAMPA )) - __state;
+    double __dtsav = dt;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_dlist1[__i]] = 0.0;
+    }
+    _p[_dlist1[2]] = __primary_delta;
+    dt *= 0.5;
+    v = NODEV(_pnt->node);
+#if NRN_VECTORIZED
+    _thread = _nt->_ml_list[_mechtype]->_thread;
+#endif
+    _ode_matsol_instance1(_threadargs_);
+    dt = __dtsav;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_slist1[__i]] += _p[_dlist1[__i]];
+    }
+  } else {
+ gRISEexc = gRISEexc + _args[0] * _args[1] * ( mAMPA ) ;
+           }
+ }
        }
      else {
-       gINH = gINH + _args[0] ;
-       gRISEinh = gRISEinh + _args[0] ;
-       }
+         if (nrn_netrec_state_adjust && !cvode_active_){
+    /* discon state adjustment for general derivimplicit and KINETIC case */
+    int __i, __neq = 8;
+    double __state = gINH;
+    double __primary_delta = (gINH + _args[0]) - __state;
+    double __dtsav = dt;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_dlist1[__i]] = 0.0;
+    }
+    _p[_dlist1[5]] = __primary_delta;
+    dt *= 0.5;
+    v = NODEV(_pnt->node);
+#if NRN_VECTORIZED
+    _thread = _nt->_ml_list[_mechtype]->_thread;
+#endif
+    _ode_matsol_instance1(_threadargs_);
+    dt = __dtsav;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_slist1[__i]] += _p[_dlist1[__i]];
+    }
+  } else {
+ gINH = gINH + _args[0] ;
+         }
+   if (nrn_netrec_state_adjust && !cvode_active_){
+    /* discon state adjustment for general derivimplicit and KINETIC case */
+    int __i, __neq = 8;
+    double __state = gRISEinh;
+    double __primary_delta = (gRISEinh + _args[0]) - __state;
+    double __dtsav = dt;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_dlist1[__i]] = 0.0;
+    }
+    _p[_dlist1[3]] = __primary_delta;
+    dt *= 0.5;
+    v = NODEV(_pnt->node);
+#if NRN_VECTORIZED
+    _thread = _nt->_ml_list[_mechtype]->_thread;
+#endif
+    _ode_matsol_instance1(_threadargs_);
+    dt = __dtsav;
+    for (__i = 0; __i < __neq; ++__i) {
+      _p[_slist1[__i]] += _p[_dlist1[__i]];
+    }
+  } else {
+ gRISEinh = gRISEinh + _args[0] ;
+         }
+ }
      }
    } }
  
@@ -537,6 +786,10 @@ static void _ode_map(int _ieq, double** _pv, double** _pvdot, double* _pp, Datum
 	}
  }
  
+static void _ode_matsol_instance1(_threadargsproto_) {
+ _ode_matsol1 (_p, _ppvar, _thread, _nt);
+ }
+ 
 static void _ode_matsol(_NrnThread* _nt, _Memb_list* _ml, int _type) {
    double* _p; Datum* _ppvar; Datum* _thread;
    Node* _nd; double _v; int _iml, _cntml;
@@ -546,7 +799,7 @@ static void _ode_matsol(_NrnThread* _nt, _Memb_list* _ml, int _type) {
     _p = _ml->_data[_iml]; _ppvar = _ml->_pdata[_iml];
     _nd = _ml->_nodelist[_iml];
     v = NODEV(_nd);
- _ode_matsol1 (_p, _ppvar, _thread, _nt);
+ _ode_matsol_instance1(_threadargs_);
  }}
  
 static void _thread_mem_init(Datum* _thread) {
@@ -606,7 +859,8 @@ for (_iml = 0; _iml < _cntml; ++_iml) {
   }
  v = _v;
  initmodel(_p, _ppvar, _thread, _nt);
-}}
+}
+}
 
 static double _nrn_current(double* _p, Datum* _ppvar, Datum* _thread, _NrnThread* _nt, double _v){double _current=0.;v=_v;{
 } return _current;
@@ -632,7 +886,9 @@ for (_iml = 0; _iml < _cntml; ++_iml) {
     _v = NODEV(_nd);
   }
  
-}}
+}
+ 
+}
 
 static void nrn_jacob(_NrnThread* _nt, _Memb_list* _ml, int _type) {
 double* _p; Datum* _ppvar; Datum* _thread;
@@ -654,12 +910,15 @@ for (_iml = 0; _iml < _cntml; ++_iml) {
 	NODED(_nd) += _g;
   }
  
-}}
+}
+ 
+}
 
 static void nrn_state(_NrnThread* _nt, _Memb_list* _ml, int _type) {
- double _break, _save;
 double* _p; Datum* _ppvar; Datum* _thread;
-Node *_nd; double _v; int* _ni; int _iml, _cntml;
+Node *_nd; double _v = 0.0; int* _ni; int _iml, _cntml;
+double _dtsav = dt;
+if (secondorder) { dt *= 0.5; }
 #if CACHEVEC
     _ni = _ml->_nodeindices;
 #endif
@@ -677,21 +936,20 @@ for (_iml = 0; _iml < _cntml; ++_iml) {
     _nd = _ml->_nodelist[_iml];
     _v = NODEV(_nd);
   }
- _break = t + .5*dt; _save = t;
  v=_v;
 {
- { {
- for (; t < _break; t += dt) {
-  _deriv1_advance = 1;
+ {  _deriv1_advance = 1;
  derivimplicit_thread(8, _slist1, _dlist1, _p, states, _ppvar, _thread, _nt);
 _deriv1_advance = 0;
-  
-}}
- t = _save;
+     if (secondorder) {
+    int _i;
+    for (_i = 0; _i < 8; ++_i) {
+      _p[_slist1[_i]] += dt*_p[_dlist1[_i]];
+    }}
  } {
    }
 }}
-
+ dt = _dtsav;
 }
 
 static void terminal(){}
@@ -721,4 +979,187 @@ _first = 0;
 
 #if defined(__cplusplus)
 } /* extern "C" */
+#endif
+
+#if NMODL_TEXT
+static const char* nmodl_filename = "/u/cliffk/neuro/okinawa/heidi/project/Lonardoni2017_data/nrnMod/AdExp.mod";
+static const char* nmodl_file_text = 
+  ": AdExp IF (Adaptive Exponential Intgrate and Fire)\n"
+  ": All printfs are for debugging purposes and can be ignored\n"
+  "\n"
+  "\n"
+  "NEURON {\n"
+  "\n"
+  "    POINT_PROCESS AdExp\n"
+  "	RANGE num\n"
+  "    RANGE G_l, Delta_T, tau_w, a, b, E_l, I_ext, C\n"
+  "    RANGE taue, taui, erev, irev\n"
+  "    RANGE V_reset, V_thre, tRISE,tot\n"
+  "    RANGE gRISEinh,gRISEexc, iEXT,tauINH,tauEXC,tRISE,tRISEnmda,tDECAYnmda,gAMPA,gGABA\n"
+  "    RANGE iNMDA,iAMPA,iGABA,iTotal,gGABA,gAMPA,gNMDA,mAMPA,mNMDA,rpeso,Erev,v0_block,k_block,tau_r, tau_d\n"
+  "\n"
+  "}\n"
+  "\n"
+  "UNITS {\n"
+  "\n"
+  "	(mV) = (millivolt)\n"
+  "	(pA) = (picoamp)\n"
+  "	(uS) = (microsiemens)\n"
+  "    (nS) = (nanosiemens)\n"
+  "	(pS) = (picosiemens)\n"
+  "}\n"
+  "\n"
+  "PARAMETER {\n"
+  "	num = -1  					:Cell ID\n"
+  "	V_reset = -60	(mV)		:reset potential after spike\n"
+  "	V_thre = -50.4	(mV)		:threshold for spike detection\n"
+  "	V_spike = -10	(mV)	    :value of spike\n"
+  "	a = 4			(nS)		:coupling with adaptive variable\n"
+  "	b = 80.5		(pA)		:adaptive increment\n"
+  "	tau_w = 144		(ms)		:adaptive time costant\n"
+  "	E_l = -70.6		(mV)		:resting potential for leak term\n"
+  "	G_l = 30		(nS)	    :leak conduptance\n"
+  "	Delta_T = 2		(mV)	    :speed of exp\n"
+  "\n"
+  "	eps = 0.1		(ms) 		:smaller than time step\n"
+  "	iEXT = 0        (pA) 	    :external current\n"
+  "	C = 281 		(nS)		:membrane conduptance\n"
+  "    tauEXC = 3 		(ms) 		:excitatory time costant\n"
+  "    tauINH = 8		(ms) 		:inhibitory time costant\n"
+  "    erev = 0        (mV) 		:reverse potential for exc\n"
+  "    irev = -70		(mV)		:reverse potential for inh\n"
+  "    tRISE = 1 		(ms) 		:time to activate the synapse\n"
+  "\n"
+  "    mNMDA=.05\n"
+  "    mAMPA=1\n"
+  "    v0_block 	= -50\n"
+  "	k_block 	= 8\n"
+  "\n"
+  "	tRISEnmda = 5.63    (ms)        :Chapman DE 2003, Table 1 - rise tau\n"
+  "	tDECAYnmda = 140     (ms)        :Chapman DE 2003, Fig 2B Ventromedial - decay tau\n"
+  "\n"
+  "	Erev= 0         (mV)        :reversal potential, Dalby 2003\n"
+  "	rpeso=12        (nS)\n"
+  "\n"
+  "}\n"
+  "\n"
+  "ASSIGNED {\n"
+  "    gNMDA           (nS)\n"
+  "    gAMPA           (nS)\n"
+  "    gGABA           (nS)\n"
+  "	iAMPA           (pA)\n"
+  "    iGABA           (pA)\n"
+  "	iNMDA           (pA)\n"
+  "    iNOISE          (pA)\n"
+  "    iTotal          (pA)\n"
+  "\n"
+  "\n"
+  "}\n"
+  "\n"
+  "STATE {\n"
+  "    vv              (mV)\n"
+  "    ww              (pA)\n"
+  "    gEXC            (nS)\n"
+  "    gINH            (nS)\n"
+  "    gRISEexc        (nS)\n"
+  "    gRISEinh        (nS)\n"
+  "    y1              (nS)\n"
+  "    y2              (nS)\n"
+  "}\n"
+  "\n"
+  "INITIAL { :initializion and activation of the process\n"
+  "\n"
+  "    gEXC=0          (nS)\n"
+  "    gINH=0          (nS)\n"
+  "    gRISEexc=0      (nS)\n"
+  "    gRISEinh=0      (nS)\n"
+  "    gAMPA=0         (nS)\n"
+  "    gGABA=0         (nS)\n"
+  "    ww=0            (pA)\n"
+  "    vv=-60          (mV)\n"
+  "    net_send(0,1)\n"
+  "}\n"
+  "\n"
+  "\n"
+  "BREAKPOINT {\n"
+  "\n"
+  "\n"
+  "\n"
+  "SOLVE states METHOD derivimplicit\n"
+  "\n"
+  "\n"
+  "}\n"
+  "\n"
+  "DERIVATIVE states {\n"
+  "\n"
+  "	y1' = -y1 / (tDECAYnmda)\n"
+  "	y2' = -y2 / (tRISEnmda)\n"
+  "    gNMDA = (y2-y1)\n"
+  "	iNMDA = (gNMDA)* (vv - Erev)*1 / ( 1 + exp ( - ( vv - v0_block ) / k_block ))\n"
+  "\n"
+  "    gRISEexc' = - gRISEexc/tRISE        :rise of excitatory synapse\n"
+  "    gRISEinh'= - gRISEinh/tRISE         :rise of inhibitory synapse\n"
+  "    gEXC' = - gEXC /tauEXC              :decay of exc conduptance\n"
+  "    gINH' = - gINH /tauINH              :decay of inh conduptance\n"
+  "\n"
+  "    gAMPA = (gRISEexc-gEXC)\n"
+  "	iAMPA = gAMPA * ( vv - erev )\n"
+  "\n"
+  "    gGABA = (gRISEinh-gINH)\n"
+  "    iGABA = -gGABA * ( vv - irev )\n"
+  "\n"
+  "\n"
+  "    														:iNOISE = - (x2-x1) * ( vv - erev )\n"
+  "    iTotal=-ww+iEXT+iAMPA+iGABA+iNMDA  						:+iNOISE\n"
+  "\n"
+  "    vv'=1/C*(-G_l*(vv-E_l)+G_l*Delta_T*exp(((vv-V_thre))/Delta_T)+iTotal)\n"
+  "    ww' = 1/tau_w*(a*(vv-E_l)-ww)\n"
+  "\n"
+  "    }\n"
+  "\n"
+  "\n"
+  "NET_RECEIVE (w0,w1,w2) {\n"
+  "    INITIAL {\n"
+  "        w1=w1\n"
+  "        w2=w2\n"
+  "        }\n"
+  "    if (flag == 1) {                            :wait for membrane potential to reach threshold\n"
+  "        WATCH (vv>V_spike) 2\n"
+  "    }\n"
+  "    else if (flag == 2) {                       :threshold reached, fire and reset the model\n"
+  "\n"
+  "    net_event(t)\n"
+  "    vv = V_reset\n"
+  "    ww = ww+b\n"
+  "\n"
+  "    }\n"
+  "    else if (flag==0) {                         :an event has arrived -> synaptic activation\n"
+  "\n"
+  "    if ( w0 > 0 ) {                             :positive weight -> excitatory synapse\n"
+  "\n"
+  "        if (w0>1000) {                              :overlimit conductance -> poisson process\n"
+  "            gEXC=gEXC+rpeso\n"
+  "            gRISEexc=gRISEexc+rpeso\n"
+  "            :x1=x1+rpeso\n"
+  "            :x2=x2+rpeso\n"
+  "        }\n"
+  "\n"
+  "        else {                                      :genuine excitation -> update synconductance\n"
+  "\n"
+  "            y1=y1+(w0 *(mNMDA))\n"
+  "            y2=y2+(w0 *(mNMDA))\n"
+  "            gEXC=gEXC+w0 *w1*(mAMPA)\n"
+  "            gRISEexc=gRISEexc+w0 *w1*(mAMPA)\n"
+  "        }\n"
+  "\n"
+  "    }\n"
+  "    else {                                          :genuine inhibition -> update synconductance\n"
+  "\n"
+  "        gINH=gINH+w0\n"
+  "        gRISEinh=gRISEinh+w0\n"
+  "\n"
+  "        }\n"
+  "    }\n"
+  "}\n"
+  ;
 #endif
