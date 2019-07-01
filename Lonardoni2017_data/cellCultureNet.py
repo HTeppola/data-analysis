@@ -152,7 +152,7 @@ def ConnectNetwork(G, net_w, mAMPA=1, printFlag=False):
 
     for cell in G.nodes():
         #   retreive outgoing edges for each node
-        out_con_from = G.edges_iter([cell])
+        out_con_from = G.edges([cell])
         for link in out_con_from:
             #   all connections originating from cell
             destLink = link[1]

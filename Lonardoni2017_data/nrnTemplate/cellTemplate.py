@@ -53,7 +53,7 @@ class AdExpcell:
             self.AdExp.mNMDA = modPar['mNMDA']
         else:
             self.ID_syn = 'UNDEF'
-            print "Neither excitatory nor inhibitory neuron. The neural type if undefined and no synapse will be formed!"
+            print("Neither excitatory nor inhibitory neuron. The neural type if undefined and no synapse will be formed!")
         # create new section & add AdExp mechanism
         self.AdExp.mAMPA = modPar['mAMPA']
         self.varDt = varDt
@@ -94,7 +94,7 @@ class AdExpcell:
         tota = 0
         if stimPar['active'] != -1:
             LP = len(stimPar['positions'])
-            for i in xrange(LP):
+            for i in range(LP):
                 x = stimPar['positions'][i][0]  # 0.8# stimPar[['active']%4
                 y = stimPar['positions'][i][1]  # 0.8#(stimPar[['active']-x)/4
                 d = ((self.pos['x'] - x) ** 2 + (self.pos['y'] - y) ** 2)
@@ -111,7 +111,7 @@ class AdExpcell:
                     self.Stim.seed(1.)
                     self.StimInput = h.NetCon(self.Stim, self.AdExp, -20, 0.1, 100, sec=self.soma)
                     self.StimInput.weight[0] = 45 * (1 - (d / (0.08 ** 2)))
-                    print "stimulation at node %s!!! S:%.2f" % (num, self.StimInput.weight[0])
+                    print("stimulation at node %s!!! S:%.2f" % (num, self.StimInput.weight[0]))
                     self.StimInput.weight[1] = 1
                     self.record['Stimspk'] = h.Vector()
                     self.nc_STIMspike = h.NetCon(self.Stim, None, -20, 0, 1, sec=self.soma)
@@ -186,7 +186,7 @@ class AdExpcell:
                 self.Pcon[-1].weight[1] = mAMPA
                 self.Pcon[-1].weight[0] = peso
         else:
-            for _ in xrange(len(spk)):
+            for _ in range(len(spk)):
                 self.PL.append(h.stp_2(self.soma(0.5)))
                 self.PL[-1].tau_rec = 100  # net_w['stp']
                 self.PL[-1].U = .2  # net_w['U']
@@ -274,7 +274,7 @@ class AdExpcell:
                     (((self.pos['x'] - dest.pos['x']) ** 2 + (self.pos['y'] - dest.pos['y']) ** 2) ** 0.5))
 
         else:
-            print "Since ", self.ID_syn, " is neither an excitatory nor an inhibitory neuron not connection is made!"
+            print("Since ", self.ID_syn, " is neither an excitatory nor an inhibitory neuron not connection is made!")
 
     def destroy(self):
         del self.PreList
@@ -312,7 +312,7 @@ class AdExpcell:
         self.voltage = False
 
     def RecAll_traces(self):
-        print 'I am recording everything'
+        print('I am recording everything')
         self.record['gAMPA'] = h.Vector()
         self.record['gGABA'] = h.Vector()
         self.record['gNMDA'] = h.Vector()
