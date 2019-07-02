@@ -15,7 +15,8 @@ import numpy.random as rnd
 import networkx as nx
 
 from neuron import h
-from neuron import gui
+h.load_file('stdgui.hoc')
+#from neuron import gui
 
 #   ADD PATH
 sys.path.append('nrnTemplate/')
