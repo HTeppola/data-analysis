@@ -23,8 +23,8 @@ cellRule['secs']['dend']['topol'] = {'parentSec': 'soma', 'parentX': 1.0, 'child
 cellRule['secs']['dend']['mechs']['pas'] = {'g': 0.0000357, 'e': -70} 									# dend mechanisms
 netParams.cellParams['PYR_HH_rule'] = cellRule  
 
-#AdExpPars = {'mod':'AdExp', 'tau_w': 280, 'G_l': 10, 'a': 2, 'b': 40, 'C': 281, 'E_l': -70.6, 'V_thre': -50.4, 'Delta_T': 2, 'V_reset': -70.6, 'iEXT': 50}														# add dict to list of cell parameters
-AdExpPars = {'mod':'AdExp', 'tau_w': 280, 'G_l': 10, 'a': 2, 'b': 10, 'C': 200, 'E_l': -70,   'V_thre': -50,   'Delta_T': 2, 'V_reset': -80, 'iEXT': 75}
+#AdExpPars = {'mod':'AdExp', 'vref':'vv', 'tau_w': 280, 'G_l': 10, 'a': 2, 'b': 40, 'C': 281, 'E_l': -70.6, 'V_thre': -50.4, 'Delta_T': 2, 'V_reset': -70.6, 'iEXT': 50}														# add dict to list of cell parameters
+AdExpPars = {'mod':'AdExp', 'vref':'vv', 'tau_w': 280, 'G_l': 10, 'a': 2, 'b': 10, 'C': 200, 'E_l': -70,   'V_thre': -50,   'Delta_T': 2, 'V_reset': -80, 'iEXT': 75}
 
 IzhiPars = {'mod':'Izhi2007b', 'C':1, 'k':0.7, 
 	'vr':-60, 'vt':-40, 'vpeak':35, 'a':0.03, 'b':-2, 'c':-50, 'd':100, 'celltype':1}
