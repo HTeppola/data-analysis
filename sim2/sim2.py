@@ -17,7 +17,7 @@ sc.tic()
 ncells = 100 # Number of cells
 duration = 1000 # Set the duration 
 connweights = [1.0, 10.0] # Set the connectivity weights for each synapse type
-noiseweights = [1.0, 13.0] # Set the noise stimulation weights for each synapse
+noiseweights = [1.0, 10.0] # Set the noise stimulation weights for each synapse
 noiserate = 100 # Rate of stimulation, in Hz
 whichcell = 0 # The cell to record from
 connprob = 0.0
@@ -32,7 +32,7 @@ spikerecorders = []
 dummy = h.Section()
 
 for c in range(ncells):
-    thiscell = createcell(dummy, c)
+    thiscell = createcell(dummy)
     cells.append(thiscell)
     spikevecs.append(h.Vector())
     spikerecorders.append(h.NetCon(cells[c], None))

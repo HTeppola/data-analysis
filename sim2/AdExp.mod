@@ -125,6 +125,10 @@ DERIVATIVE states {
 
     														:iNOISE = - (x2-x1) * ( vv - erev )
     iTotal=-ww+iEXT+iAMPA+iGABA+iNMDA  						:+iNOISE
+    
+    if (vv > V_thre) {
+      V_thre = vv+1.0
+      }
 
     vv'=1/C*(-G_l*(vv-E_l)+G_l*Delta_T*exp(((vv-V_thre))/Delta_T)+iTotal)
     ww' = 1/tau_w*(a*(vv-E_l)-ww)
