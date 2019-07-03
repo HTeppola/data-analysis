@@ -14,10 +14,12 @@ import sciris as sc
 
 sc.tic()
 
+ncells = 100 # Number of cells
 duration = 1000 # Set the duration 
-connweights = [10.0, 10.0]
-noiseweights = [1.0, 10.0]
-whichcell = 0
+connweights = [1.0, 10.0] # Set the connectivity weights for each synapse type
+noiseweights = [1.0, 13.0] # Set the noise stimulation weights for each synapse
+noiserate = 100 # Rate of stimulation, in Hz
+whichcell = 0 # The cell to record from
 connprob = 0.0
 whichsyns = [0,1]
 receptors = ['w0','w1','w2']
@@ -28,7 +30,7 @@ cells = []
 spikevecs = []
 spikerecorders = []
 dummy = h.Section()
-ncells = 100
+
 for c in range(ncells):
     thiscell = createcell(dummy, c)
     cells.append(thiscell)
@@ -60,7 +62,7 @@ for c in range(ncells):
     noisegens.append(noisegen)
     
     noiseinput = h.NetStim()
-    noiseinput.interval = 10 # Take inverse and then convert from Hz to ms^-1
+    noiseinput.interval = 1.0/noiserate*1000 # Take inverse and then convert from Hz to ms^-1
     noiseinput.number = 1e9
     noiseinput.start = 0
     noiseinput.noise = 1
@@ -105,8 +107,8 @@ for c in range(ncells):
         why = 100+c*pl.ones(len(spikevecs[c]))
         pl.scatter(ex, why)
         pl.show()
-    else:
-        print('No spikes for cell %i' % c)
+#    else:
+#        print('No spikes for cell %i' % c)
 pl.xlabel('Time (ms)')
 pl.ylabel('Voltage & cell ID')
 pl.xlim(tvec[0],tvec[-1])
