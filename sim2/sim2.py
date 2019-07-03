@@ -12,6 +12,10 @@ from adexp import createcell
 import pylab as pl
 import sciris as sc
 
+Hines = h.CVode()
+Hines.active(1)
+Hines.use_local_dt(1)
+
 sc.tic()
 
 ncells = 100 # Number of cells
