@@ -10,28 +10,32 @@ Version: 2013sep13
 from neuron import h, init, run
 from adexp import createcell
 import pylab as pl
+import sciris as sc
 
-duration=1000
-connweight = 1.0
-noiseweight = 1.0
-whichcell=0
-connprob=0.1
-whichsyns=[0,1,2]
-receptors=['w0','w1','w2']
+sc.tic()
+
+duration = 1000
+connweights = [1.0, 1.0]
+noiseweights = [1.0, 1.0]
+whichcell = 0
+connprob = 0.0
+whichsyns = [0,1]
+receptors = ['w0','w1','w2']
 
 ## Create cells
 print('Creating...')
-cells=[]
-spikevecs=[]
-spikerecorders=[]
+cells = []
+spikevecs = []
+spikerecorders = []
 dummy = h.Section()
-ncells=100
+ncells = 100
 for c in range(ncells):
     thiscell = createcell(dummy, c)
     cells.append(thiscell)
     spikevecs.append(h.Vector())
     spikerecorders.append(h.NetCon(cells[c], None))
     spikerecorders[-1].record(spikevecs[-1])
+sc.toc()
 
 ## Connect cells
 print('Connecting...')
@@ -41,14 +45,14 @@ for c1 in range(ncells):
         if c1!=c2 and connprob>pl.rand():
             connections.append(h.NetCon(cells[c1], cells[c2])) # Connect them
             for syn in whichsyns:
-                connections[-1].weight[syn] = connweight
-    
+                connections[-1].weight[syn] = connweights[syn]
+sc.toc()
 
 ## Add inputs
 print('Inputting...')
-noiseinputs=[] # Create empty list for storing synapses
-noisegens=[] # Create random number generators
-noiseconns=[] # Create stimulus connections
+noiseinputs = [] # Create empty list for storing synapses
+noisegens = [] # Create random number generators
+noiseconns = [] # Create stimulus connections
 for c in range(ncells): 
     noisegen = h.Random()
     noisegen.MCellRan4(c,c*2)
@@ -65,7 +69,7 @@ for c in range(ncells):
     
     noiseconn = h.NetCon(noiseinput, cells[c])
     for syn in whichsyns:
-        noiseconn.weight[syn] = noiseweight
+        noiseconn.weight[syn] = noiseweights[syn]
     noiseconn.delay=2
     noiseconns.append(noiseconn)
 
@@ -77,10 +81,12 @@ tvec.record(h._ref_t)
 vvec.record(cells[whichcell]._ref_vv)
 wvec.record(cells[whichcell]._ref_ww)
 ivec.record(cells[whichcell]._ref_gEXC)
+sc.toc()
 
 print('Running...')
 init()
 run(duration)
+sc.toc()
 
 print('Plotting...')
 pl.figure()
@@ -105,7 +111,8 @@ pl.xlabel('Time (ms)')
 pl.ylabel('Voltage & cell ID')
 pl.xlim(tvec[0],tvec[-1])
 firingrate = float(sum(len(pl.array(spikevecs[c])) for c in range(ncells)))/ncells/duration*1000
-pl.title('cells=%i syns/cell=%i weight=%0.1f noise=%0.1f rate=%0.1f Hz' % (ncells,len(connections)/ncells,connweight,noiseweight,firingrate),fontsize=12)
+pl.title('cells=%i syns/cell=%i weight=%s noise=%s rate=%0.1f Hz' % (ncells,len(connections)/ncells,connweights,noiseweights,firingrate),fontsize=12)
+sc.toc()
 
 
 print('Done.')
