@@ -15,12 +15,13 @@ import sciris as sc
 integrator = h.CVode()
 integrator.active(1)
 integrator.use_local_dt(1)
+pl.seed(23847) # Reproducible results (hopefully)
 
 sc.tic()
 
 ncells = 100 # Number of cells
-duration = 500 # Set the duration 
-connweights = [10.0, 1.0] # Set the connectivity weights for each synapse type -- not sure what the difference is
+duration = 2000 # Set the duration 
+connweights = [8.0, 1.0] # Set the connectivity weights for each synapse type -- not sure what the difference is
 noiseweights = [8.0, 1.0] # Set the noise stimulation weights for each synapse
 noiserate = 100 # Rate of stimulation, in Hz
 connprob = 0.2 # The connection probability
