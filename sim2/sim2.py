@@ -8,16 +8,16 @@ Version: 2013sep13
 """
 
 from neuron import h, init, run
-from izhi import pyramidal
+from adexp import createcell
 import pylab as pl
 
 duration=1000
-connweight = 0.0
-noiseweight = 10
+connweight = 1.0
+noiseweight = 1.0
 whichcell=0
 connprob=0.1
-whichsyn=3
-receptors=['AMPA','NMDA','GABAA','GABAB']
+whichsyns=[0,1,2]
+receptors=['w0','w1','w2']
 
 ## Create cells
 print('Creating...')
@@ -25,9 +25,10 @@ cells=[]
 spikevecs=[]
 spikerecorders=[]
 dummy = h.Section()
-ncells=1000
+ncells=100
 for c in range(ncells):
-    cells.append(pyramidal(dummy))
+    thiscell = createcell(dummy, c)
+    cells.append(thiscell)
     spikevecs.append(h.Vector())
     spikerecorders.append(h.NetCon(cells[c], None))
     spikerecorders[-1].record(spikevecs[-1])
@@ -39,7 +40,8 @@ for c1 in range(ncells):
     for c2 in range(ncells):
         if c1!=c2 and connprob>pl.rand():
             connections.append(h.NetCon(cells[c1], cells[c2])) # Connect them
-            connections[-1].weight[whichsyn] = connweight
+            for syn in whichsyns:
+                connections[-1].weight[syn] = connweight
     
 
 ## Add inputs
@@ -62,25 +64,34 @@ for c in range(ncells):
     noiseinputs.append(noiseinput)
     
     noiseconn = h.NetCon(noiseinput, cells[c])
-    noiseconn.weight[1] = noiseweight
+    for syn in whichsyns:
+        noiseconn.weight[syn] = noiseweight
     noiseconn.delay=2
     noiseconns.append(noiseconn)
 
 tvec = h.Vector()
 vvec = h.Vector()
-uvec = h.Vector()
+wvec = h.Vector()
 ivec = h.Vector()
 tvec.record(h._ref_t)
-vvec.record(cells[whichcell]._ref_V)
-uvec.record(cells[whichcell]._ref_u)
-uvec.record(cells[whichcell]._ref_I)
+vvec.record(cells[whichcell]._ref_vv)
+wvec.record(cells[whichcell]._ref_ww)
+ivec.record(cells[whichcell]._ref_gEXC)
 
 print('Running...')
 init()
 run(duration)
 
 print('Plotting...')
-pl.plot(pl.array(tvec),pl.array(vvec))
+pl.figure()
+pl.subplot(3,1,1)
+pl.plot(pl.array(tvec), pl.array(vvec))
+pl.subplot(3,1,2)
+pl.plot(pl.array(tvec), pl.array(wvec))
+pl.subplot(3,1,3)
+pl.plot(pl.array(tvec), pl.array(ivec))
+
+pl.figure()
 pl.scatter(pl.array(spikevecs[whichcell]), pl.zeros(len(spikevecs[whichcell])))
 for c in range(ncells): 
     ex = pl.array(spikevecs[c])
@@ -94,7 +105,7 @@ pl.xlabel('Time (ms)')
 pl.ylabel('Voltage & cell ID')
 pl.xlim(tvec[0],tvec[-1])
 firingrate = float(sum(len(pl.array(spikevecs[c])) for c in range(ncells)))/ncells/duration*1000
-pl.title('cells=%i syns/cell=%i weight=%0.1f syn=%s noise=%0.1f rate=%0.1f Hz' % (ncells,len(connections)/ncells,connweight,receptors[whichsyn],noiseweight,firingrate),fontsize=12)
+pl.title('cells=%i syns/cell=%i weight=%0.1f noise=%0.1f rate=%0.1f Hz' % (ncells,len(connections)/ncells,connweight,noiseweight,firingrate),fontsize=12)
 
 
 print('Done.')
