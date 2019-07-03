@@ -12,13 +12,14 @@ from adexp import createcell
 import pylab as pl
 import sciris as sc
 
-Hines = h.CVode()
-Hines.active(1)
-Hines.use_local_dt(1)
+# Without specifying the integrator, it dies on every spike
+integrator = h.CVode()
+integrator.active(1)
+integrator.use_local_dt(1)
 
 sc.tic()
 
-ncells = 100 # Number of cells
+ncells = 1000 # Number of cells
 duration = 1000 # Set the duration 
 connweights = [1.0, 10.0] # Set the connectivity weights for each synapse type
 noiseweights = [1.0, 10.0] # Set the noise stimulation weights for each synapse
@@ -78,7 +79,9 @@ for c in range(ncells):
         noiseconn.weight[syn] = noiseweights[syn]
     noiseconn.delay=2
     noiseconns.append(noiseconn)
+sc.toc()
 
+print('Setting up recording...')
 tvec = h.Vector()
 vvec = h.Vector()
 wvec = h.Vector()
@@ -108,11 +111,11 @@ pl.scatter(pl.array(spikevecs[whichcell]), pl.zeros(len(spikevecs[whichcell])))
 for c in range(ncells): 
     ex = pl.array(spikevecs[c])
     if len(ex)>0:
-        why = 100+c*pl.ones(len(spikevecs[c]))
+        why = c*pl.ones(len(spikevecs[c]))
         pl.scatter(ex, why)
         pl.show()
-#    else:
-#        print('No spikes for cell %i' % c)
+    else:
+        print('No spikes for cell %i' % c)
 pl.xlabel('Time (ms)')
 pl.ylabel('Voltage & cell ID')
 pl.xlim(tvec[0],tvec[-1])
