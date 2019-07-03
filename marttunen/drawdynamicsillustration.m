@@ -11,7 +11,7 @@
 % second one from loading pars.mat on), and the PyNEST code is run between
 % these two sections.
 %
-%  Tuomo Mäki-Marttunen
+%  Tuomo Mki-Marttunen
 %  Last modified 8.1.2013
 
 tic;
@@ -50,7 +50,7 @@ save('pars.mat','Ie','Ii','wee','wei','wie','wii','Ne','Ni','dt','syndelay','syn
 %spikes_lif = load(spikefile,'-ascii');
 %Vrec_lif = load(vmfile,'-ascii');
 
-save('example.mat','spikes_hh','Vrec_hh','spikes_lif','Vrec_lif');
+%save('example.mat','spikes_hh','Vrec_hh','spikes_lif','Vrec_lif');
 
 %spikes_lif = spikes_lif(:,[2 1]);
 %spikes_lif(:,2) = round(spikes_lif(:,2) - 100);
@@ -79,7 +79,7 @@ for imod=1:2
     Vrec = Vrec_hh;
     resolution = 40; %40 saved values/ms
     minBS = 1.5*80;
-  end
+end
   subplot(SP(imod,1));
   Vrec = Vrec(resolution*1000:resolution*61000-1); %ignore the first second
   spikes = spikes(spikes(:,1)>= 1000,:);           %ignore the first second
@@ -124,7 +124,7 @@ for imod=1:2
   set(gca,'yticklabel',[],'xtick',[-300 0 300 600]);
 %  ylabel('Neuron index');
   saveas(gcf,'examplefig.pdf');
-end
+
 
 
 

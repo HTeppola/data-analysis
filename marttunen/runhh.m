@@ -19,17 +19,17 @@
 %    Vrec   - the membrane potential time course of the first excitatory and
 %             first inhibitory neuron (do not use if only excitatory neurons)
 %
-%  Tuomo Mäki-Marttunen
+%  Tuomo Mï¿½ki-Marttunen
 %  Last modified 8.1.2013
 
 function [spikes,Vrec]=runhh(Ne,M,T,dt,I_mu,I_dev)
 
 if nargin < 1 || isempty(Ne)
-    Ne = 1; %number of excitatory cells
+    Ne = 80; %number of excitatory cells
 end
 
 if nargin < 2 || isempty(M)
-    Ni = 0; %number of inhibitory cells
+    Ni = 20; %number of inhibitory ceclls
     N = Ne + Ni;
     M = rand(N,N) < 0.5; %the connectivity matrix is picked by random
     M(~~eye(N)) = 0;     %no autapses
