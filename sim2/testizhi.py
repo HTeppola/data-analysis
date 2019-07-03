@@ -13,7 +13,7 @@ import pylab as pl
 
 duration=1000
 connweight = 0.0
-noiseweight = 1
+noiseweight = 10
 whichcell=0
 connprob=0.1
 whichsyn=3
