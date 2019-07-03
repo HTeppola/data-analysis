@@ -14,9 +14,9 @@ import sciris as sc
 
 sc.tic()
 
-duration = 1000
-connweights = [1.0, 1.0]
-noiseweights = [1.0, 1.0]
+duration = 1000 # Set the duration 
+connweights = [10.0, 10.0]
+noiseweights = [1.0, 10.0]
 whichcell = 0
 connprob = 0.0
 whichsyns = [0,1]
