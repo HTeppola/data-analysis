@@ -1,10 +1,9 @@
 """
-TESTIZHI
+SIM2
 
-This script does a very simple test of Izhikevich neurons to see what's going
-wrong.
+A simple implementation of an AdExp neuronal network.
 
-Version: 2013sep13
+Version: 2019jul03
 """
 
 from neuron import h, init, run
@@ -19,15 +18,15 @@ integrator.use_local_dt(1)
 
 sc.tic()
 
-ncells = 1000 # Number of cells
-duration = 1000 # Set the duration 
+ncells = 100 # Number of cells
+duration = 2000 # Set the duration 
 connweights = [1.0, 10.0] # Set the connectivity weights for each synapse type
 noiseweights = [1.0, 10.0] # Set the noise stimulation weights for each synapse
 noiserate = 100 # Rate of stimulation, in Hz
-whichcell = 0 # The cell to record from
-connprob = 0.0
-whichsyns = [0,1]
-receptors = ['w0','w1','w2']
+whichcell = 0 # The cell to record example traces from (shouldn't matter)
+connprob = 0.2 # The sonnection probability
+whichsyns = [0,1] # Which synapses/receptors to stimulate
+receptors = ['w0','w1','w2'] # The names of the receptors (see AdExp.mod)
 
 ## Create cells
 print('Creating...')
@@ -42,7 +41,7 @@ for c in range(ncells):
     spikevecs.append(h.Vector())
     spikerecorders.append(h.NetCon(cells[c], None))
     spikerecorders[-1].record(spikevecs[-1])
-sc.toc()
+sc.toc(); pl.pause(0.1)
 
 ## Connect cells
 print('Connecting...')
@@ -53,7 +52,7 @@ for c1 in range(ncells):
             connections.append(h.NetCon(cells[c1], cells[c2])) # Connect them
             for syn in whichsyns:
                 connections[-1].weight[syn] = connweights[syn]
-sc.toc()
+sc.toc(); pl.pause(0.1)
 
 ## Add inputs
 print('Inputting...')
@@ -79,7 +78,7 @@ for c in range(ncells):
         noiseconn.weight[syn] = noiseweights[syn]
     noiseconn.delay=2
     noiseconns.append(noiseconn)
-sc.toc()
+sc.toc(); pl.pause(0.1)
 
 print('Setting up recording...')
 tvec = h.Vector()
@@ -90,12 +89,12 @@ tvec.record(h._ref_t)
 vvec.record(cells[whichcell]._ref_vv)
 wvec.record(cells[whichcell]._ref_ww)
 ivec.record(cells[whichcell]._ref_gEXC)
-sc.toc()
+sc.toc(); pl.pause(0.1)
 
 print('Running...')
 init()
 run(duration)
-sc.toc()
+sc.toc(); pl.pause(0.1)
 
 print('Plotting...')
 pl.figure()
@@ -118,10 +117,11 @@ for c in range(ncells):
         print('No spikes for cell %i' % c)
 pl.xlabel('Time (ms)')
 pl.ylabel('Voltage & cell ID')
-pl.xlim(tvec[0],tvec[-1])
-firingrate = float(sum(len(pl.array(spikevecs[c])) for c in range(ncells)))/ncells/duration*1000
+pl.xlim(tvec[0], tvec[-1])
+spikespercell = [len(pl.array(spikevecs[c])) for c in range(ncells)]
+firingrate = sum(spikespercell)/ncells/duration*1000
 pl.title('cells=%i syns/cell=%i weight=%s noise=%s rate=%0.1f Hz' % (ncells,len(connections)/ncells,connweights,noiseweights,firingrate),fontsize=12)
-sc.toc()
+sc.toc(); pl.pause(0.1)
 
 
 print('Done.')
