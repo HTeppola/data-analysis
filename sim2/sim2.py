@@ -19,9 +19,9 @@ integrator.use_local_dt(1)
 sc.tic()
 
 ncells = 100 # Number of cells
-duration = 2000 # Set the duration 
-connweights = [1.0, 8.0] # Set the connectivity weights for each synapse type -- not sure what the difference is
-noiseweights = [1.0, 8.0] # Set the noise stimulation weights for each synapse
+duration = 500 # Set the duration 
+connweights = [10.0, 1.0] # Set the connectivity weights for each synapse type -- not sure what the difference is
+noiseweights = [8.0, 1.0] # Set the noise stimulation weights for each synapse
 noiserate = 100 # Rate of stimulation, in Hz
 connprob = 0.2 # The connection probability
 conndelay = 40 # Average connection delay (ms)
