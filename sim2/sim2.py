@@ -20,11 +20,12 @@ sc.tic()
 
 ncells = 100 # Number of cells
 duration = 2000 # Set the duration 
-connweights = [1.0, 10.0] # Set the connectivity weights for each synapse type
-noiseweights = [1.0, 10.0] # Set the noise stimulation weights for each synapse
+connweights = [1.0, 8.0] # Set the connectivity weights for each synapse type -- not sure what the difference is
+noiseweights = [1.0, 8.0] # Set the noise stimulation weights for each synapse
 noiserate = 100 # Rate of stimulation, in Hz
+connprob = 0.2 # The connection probability
+conndelay = 40 # Average connection delay (ms)
 whichcell = 0 # The cell to record example traces from (shouldn't matter)
-connprob = 0.2 # The sonnection probability
 whichsyns = [0,1] # Which synapses/receptors to stimulate
 receptors = ['w0','w1','w2'] # The names of the receptors (see AdExp.mod)
 
@@ -50,8 +51,9 @@ for c1 in range(ncells):
     for c2 in range(ncells):
         if c1!=c2 and connprob>pl.rand():
             connections.append(h.NetCon(cells[c1], cells[c2])) # Connect them
+            connections[-1].delay = conndelay*(0.5+pl.rand())
             for syn in whichsyns:
-                connections[-1].weight[syn] = connweights[syn]
+                connections[-1].weight[syn] = connweights[syn]*(0.5+pl.rand())
 sc.toc(); pl.pause(0.1)
 
 ## Add inputs
