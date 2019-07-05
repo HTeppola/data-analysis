@@ -11,6 +11,7 @@ NEURON {
     RANGE V_reset, V_thre, tRISE,tot
     RANGE gRISEinh,gRISEexc, iEXT,tauINH,tauEXC,tRISE,tRISEnmda,tDECAYnmda,gAMPA,gGABA
     RANGE iNMDA,iAMPA,iGABA,iTotal,gGABA,gAMPA,gNMDA,mAMPA,mNMDA,rpeso,Erev,v0_block,k_block,tau_r, tau_d
+    RANGE label
 
 }
 
@@ -54,6 +55,7 @@ PARAMETER {
 
 	Erev= 0         (mV)        :reversal potential, Dalby 2003
 	rpeso=12        (nS)
+    label=0 : assign an arbitrary label to the cell
 
 }
 

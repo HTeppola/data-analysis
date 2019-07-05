@@ -19,9 +19,16 @@ pl.seed(23847) # Reproducible results (hopefully)
 
 sc.tic()
 
-ncells = 100 # Number of cells
-duration = 2000 # Set the duration 
-connweights = [8.0, 1.0] # Set the connectivity weights for each synapse type -- not sure what the difference is
+scale = 2
+duration = 2000 # Set the duration in ms
+n_e = 80*scale # Number of excitatory cells
+n_i = 20*scale # Number of inhibitory cells
+ncells = n_e + n_i # Number of cells
+
+connweights = {'e->e': [8.0, 1.0], # Set the connectivity weights for each synapse type, 2nd is for AMPA
+               'e->i': [8.0, 1.0], 
+               'i->e': [-15.0, 1.0], 
+               'i->i': [-8.0, 1.0]} 
 noiseweights = [8.0, 1.0] # Set the noise stimulation weights for each synapse
 noiserate = 100 # Rate of stimulation, in Hz
 connprob = 0.2 # The connection probability
@@ -39,6 +46,8 @@ dummy = h.Section()
 
 for c in range(ncells):
     thiscell = createcell(dummy)
+    if c<n_e: thiscell.label = 1 # excitatory -- arbitrary convention
+    else:     thiscell.label = 2 # inhibitory
     cells.append(thiscell)
     spikevecs.append(h.Vector())
     spikerecorders.append(h.NetCon(cells[c], None))
@@ -53,8 +62,12 @@ for c1 in range(ncells):
         if c1!=c2 and connprob>pl.rand():
             connections.append(h.NetCon(cells[c1], cells[c2])) # Connect them
             connections[-1].delay = conndelay*(0.5+pl.rand())
+            if cells[c1].label == 1 and cells[c2].label == 1: weightkey = 'e->e'
+            if cells[c1].label == 1 and cells[c2].label == 2: weightkey = 'e->i'
+            if cells[c1].label == 2 and cells[c2].label == 1: weightkey = 'i->e'
+            if cells[c1].label == 2 and cells[c2].label == 2: weightkey = 'i->i'
             for syn in whichsyns:
-                connections[-1].weight[syn] = connweights[syn]*(0.5+pl.rand())
+                connections[-1].weight[syn] = connweights[weightkey][syn]*(0.5+pl.rand())
 sc.toc(); pl.pause(0.1)
 
 ## Add inputs
@@ -114,7 +127,7 @@ for c in range(ncells):
     ex = pl.array(spikevecs[c])
     if len(ex)>0:
         why = c*pl.ones(len(spikevecs[c]))
-        pl.scatter(ex, why)
+        pl.scatter(ex, why, c='black', alpha=0.5)
         pl.show()
     else:
         print('No spikes for cell %i' % c)
@@ -123,7 +136,7 @@ pl.ylabel('Voltage & cell ID')
 pl.xlim(tvec[0], tvec[-1])
 spikespercell = [len(pl.array(spikevecs[c])) for c in range(ncells)]
 firingrate = sum(spikespercell)/ncells/duration*1000
-pl.title('cells=%i syns/cell=%i weight=%s noise=%s rate=%0.1f Hz' % (ncells,len(connections)/ncells,connweights,noiseweights,firingrate),fontsize=12)
+pl.title('cells=%i syns/cell=%i noise=%s rate=%0.1f Hz' % (ncells,len(connections)/ncells,noiseweights,firingrate),fontsize=12)
 sc.toc(); pl.pause(0.1)
 
 
