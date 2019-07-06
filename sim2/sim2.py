@@ -15,12 +15,12 @@ import sciris as sc
 integrator = h.CVode()
 integrator.active(1)
 integrator.use_local_dt(1)
-pl.seed(23847) # Reproducible results (hopefully)
+pl.seed(205738) # Reproducible results (hopefully)
 
 sc.tic()
 
 scale = 1
-duration = 2000 # Set the duration in ms
+duration = 500 # Set the duration in ms
 n_e = 80*scale # Number of excitatory cells
 n_i = 20*scale # Number of inhibitory cells
 ncells = n_e + n_i # Number of cells
@@ -162,7 +162,7 @@ pl.ylabel('gGABA(nS)')
 
 
 pl.figure()
-pl.scatter(pl.array(spikevecs[whichcell]), pl.zeros(len(spikevecs[whichcell])))
+#pl.scatter(pl.array(spikevecs[whichcell]), pl.zeros(len(spikevecs[whichcell])))
 for c in range(ncells): 
     ex = pl.array(spikevecs[c])
     if len(ex)>0:
@@ -171,7 +171,7 @@ for c in range(ncells):
             spikecolor = 'red' # excitatory -- arbitrary convention
         else:
             spikecolor = 'blue' # inhibitory
-        pl.scatter(ex, why, c=spikecolor, alpha=0.5)
+        pl.scatter(ex, why, c=spikecolor, alpha=1.0)
         pl.show()
     else:
         print('No spikes for cell %i' % c)
