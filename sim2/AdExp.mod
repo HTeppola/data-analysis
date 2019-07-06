@@ -37,7 +37,7 @@ PARAMETER {
 	Delta_T = 2		(mV)	    :speed of exp
 
 	eps = 0.1		(ms) 		:smaller than time step
-	iEXT = 0        (pA) 	    :external current
+	iEXT = 0      (pA) 	    :external current
 	C = 281 		(nS)		:membrane conduptance
     tauEXC = 3 		(ms) 		:excitatory time costant
     tauINH = 8		(ms) 		:inhibitory time costant
