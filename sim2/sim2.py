@@ -28,8 +28,8 @@ ncells = n_e + n_i # Number of cells
 globalconnweight = 1.0 # Global modulation for all weights (both connectivity and noise)
 connweights = {'e->e': [1.0, 1.0], # Set the connectivity weights for each synapse type, 2nd is for AMPA
                'e->i': [1.0, 1.0], 
-               'i->e': [-15.0, 1.0], 
-               'i->i': [-15.0, 1.0]} 
+               'i->e': [-15.0, 0.0], 
+               'i->i': [-15.0, 0.0]} 
 noiseweights = 0.5*pl.array([1.0, 1.0]) # Set the noise stimulation weights for each synapse
 noiserate = 100 # Rate of stimulation, in Hz
 connprob = 0.2 # The connection probability
@@ -47,8 +47,11 @@ dummy = h.Section()
 
 for c in range(ncells):
     thiscell = createcell(dummy)
-    if c<n_e: thiscell.label = 1 # excitatory -- arbitrary convention
-    else:     thiscell.label = 2 # inhibitory
+    if c<n_e: 
+        thiscell.label = 1 # excitatory -- arbitrary convention
+        thiscell.V_thre = -40
+    else:     
+        thiscell.label = 2 # inhibitory
     cells.append(thiscell)
     spikevecs.append(h.Vector())
     spikerecorders.append(h.NetCon(cells[c], None))
@@ -162,7 +165,8 @@ pl.xlabel('Time(ms)')
 pl.ylabel('gGABA(nS)')
 
 
-pl.figure()
+fig = pl.figure()
+ax = fig.add_subplot()
 for c in range(ncells): 
     ex = pl.array(spikevecs[c])
     if len(ex)>0:
@@ -171,7 +175,7 @@ for c in range(ncells):
             spikecolor = 'red' # excitatory -- arbitrary convention
         else:
             spikecolor = 'blue' # inhibitory
-        pl.scatter(ex, why, c=spikecolor, alpha=1.0)
+        ax.scatter(ex, why, c=spikecolor, alpha=1.0)
         pl.show()
     else:
         print('No spikes for cell %i' % c)
