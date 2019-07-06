@@ -19,7 +19,7 @@ pl.seed(23847) # Reproducible results (hopefully)
 
 sc.tic()
 
-scale = 2
+scale = 1
 duration = 2000 # Set the duration in ms
 n_e = 80*scale # Number of excitatory cells
 n_i = 20*scale # Number of inhibitory cells
@@ -167,7 +167,11 @@ for c in range(ncells):
     ex = pl.array(spikevecs[c])
     if len(ex)>0:
         why = c*pl.ones(len(spikevecs[c]))
-        pl.scatter(ex, why, c='black', alpha=0.5)
+        if c<n_e: 
+            spikecolor = 'red' # excitatory -- arbitrary convention
+        else:
+            spikecolor = 'blue' # inhibitory
+        pl.scatter(ex, why, c=spikecolor, alpha=0.5)
         pl.show()
     else:
         print('No spikes for cell %i' % c)
