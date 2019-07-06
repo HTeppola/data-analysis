@@ -20,16 +20,17 @@ pl.seed(205738) # Reproducible results (hopefully)
 sc.tic()
 
 scale = 1
-duration = 500 # Set the duration in ms
+duration = 2000 # Set the duration in ms
 n_e = 80*scale # Number of excitatory cells
 n_i = 20*scale # Number of inhibitory cells
 ncells = n_e + n_i # Number of cells
 
-connweights = {'e->e': [5.0, 3.0], # Set the connectivity weights for each synapse type, 2nd is for AMPA
-               'e->i': [5.0, 3.0], 
+globalconnweight = 1.0 # Global modulation for all weights (both connectivity and noise)
+connweights = {'e->e': [1.0, 1.0], # Set the connectivity weights for each synapse type, 2nd is for AMPA
+               'e->i': [1.0, 1.0], 
                'i->e': [-15.0, 1.0], 
                'i->i': [-15.0, 1.0]} 
-noiseweights = [8.0, 1.0] # Set the noise stimulation weights for each synapse
+noiseweights = 0.5*pl.array([1.0, 1.0]) # Set the noise stimulation weights for each synapse
 noiserate = 100 # Rate of stimulation, in Hz
 connprob = 0.2 # The connection probability
 conndelay = 40 # Average connection delay (ms)
@@ -67,7 +68,7 @@ for c1 in range(ncells):
             if cells[c1].label == 2 and cells[c2].label == 1: weightkey = 'i->e'
             if cells[c1].label == 2 and cells[c2].label == 2: weightkey = 'i->i'
             for syn in whichsyns:
-                connections[-1].weight[syn] = connweights[weightkey][syn]*(0.5+pl.rand())
+                connections[-1].weight[syn] = globalconnweight*connweights[weightkey][syn]*(0.5+pl.rand())
 sc.toc(); pl.pause(0.1)
 
 ## Add inputs
@@ -162,7 +163,6 @@ pl.ylabel('gGABA(nS)')
 
 
 pl.figure()
-#pl.scatter(pl.array(spikevecs[whichcell]), pl.zeros(len(spikevecs[whichcell])))
 for c in range(ncells): 
     ex = pl.array(spikevecs[c])
     if len(ex)>0:

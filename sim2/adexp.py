@@ -18,7 +18,7 @@ from neuron import h # Open NEURON
 def createcell(section, **kwargs):
     cell = h.AdExp(0.5, sec=section) # Create a new Izhikevich neuron at location 0 (doesn't matter where) in h.Section() "section"
     cell.rpeso = 30
-    cell.mNMDA = 0*1
+    cell.mNMDA = 1.0 # Was 0
     cell.v0_block = -55
     cell.k_block = 5
     cell.mAMPA = 1
