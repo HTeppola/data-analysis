@@ -3,7 +3,7 @@ SIM2
 
 A simple implementation of an AdExp neuronal network.
 
-Version: 2019jul03
+Version: 2019jul08
 """
 
 from neuron import h, init, run
@@ -15,18 +15,18 @@ import sciris as sc
 integrator = h.CVode()
 integrator.active(1)
 integrator.use_local_dt(1)
-pl.seed(205738) # Reproducible results (hopefully)
+pl.seed(648647) # Reproducible results (hopefully)
 
 sc.tic()
 
-scale = 3
-duration = 5000 # Set the duration in ms
+scale = 1
+duration = 1000 # Set the duration in ms
 n_e = 80*scale # Number of excitatory cells
 n_i = 20*scale # Number of inhibitory cells
 ncells = n_e + n_i # Number of cells
 
-globalconnweight = 1.0 # Global modulation for all weights (both connectivity and noise)
-connweights = {'e->e': [1.0, 3.0], # Set the connectivity weights for each synapse type, 2nd is for AMPA
+globalconnweight = 1.2 # Global modulation for all weights (both connectivity and noise)
+connweights = {'e->e': [1.0, 3.0], # Set the connecivity weights for each synapse type, 2nd is for AMPA
                'e->i': [1.0, 3.0], 
                'i->e': [-15.0, 0.0], 
                'i->i': [-15.0, 0.0]} 
@@ -183,8 +183,7 @@ for c in range(ncells):
             spikecolor = 'red' # excitatory -- arbitrary convention
         else:
             spikecolor = 'blue' # inhibitory
-        pl.scatter(ex, why, c=spikecolor, alpha=1.0)
-        pl.show()
+        ax.scatter(ex, why, c=spikecolor, alpha=1.0)
     else:
         print('No spikes for cell %i' % c)
 pl.xlabel('Time (ms)')
@@ -193,6 +192,7 @@ pl.xlim(tvec[0], tvec[-1])
 spikespercell = [len(pl.array(spikevecs[c])) for c in range(ncells)]
 firingrate = sum(spikespercell)/ncells/duration*1000
 pl.title('cells=%i syns/cell=%i noise=%s rate=%0.1f Hz' % (ncells,len(connections)/ncells,noiseweights,firingrate),fontsize=12)
+pl.show()
 sc.toc(); pl.pause(0.1)
 
 
