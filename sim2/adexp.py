@@ -32,5 +32,6 @@ def createcell(section, **kwargs):
     cell.Delta_T = 2
     cell.V_reset = -70.6
     cell.b = 40
+    cell.maxcurrent = 500
     cell.label = -1
     return cell

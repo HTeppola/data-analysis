@@ -10,7 +10,7 @@ NEURON {
     RANGE taue, taui, erev, irev
     RANGE V_reset, V_thre, tRISE,tot
     RANGE gRISEinh,gRISEexc, iEXT,tauINH,tauEXC,tRISE,tRISEnmda,tDECAYnmda,gAMPA,gGABA
-    RANGE iNMDA,iAMPA,iGABA,iTotal,gGABA,gAMPA,gNMDA,mAMPA,mNMDA,rpeso,Erev,v0_block,k_block,tau_r, tau_d
+    RANGE iNMDA,iAMPA,iGABA,iTotal,gGABA,gAMPA,gNMDA,mAMPA,mNMDA,rpeso,Erev,v0_block,k_block,tau_r, tau_d, maxcurrent
     RANGE label
 
 }
@@ -53,9 +53,10 @@ PARAMETER {
 	tRISEnmda = 5.63    (ms)        :Chapman DE 2003, Table 1 - rise tau
 	tDECAYnmda = 140     (ms)        :Chapman DE 2003, Fig 2B Ventromedial - decay tau
 
-	Erev= 0         (mV)        :reversal potential, Dalby 2003
-	rpeso=12        (nS)
-    label=0 : assign an arbitrary label to the cell
+	Erev = 0         (mV)        :reversal potential, Dalby 2003
+	rpeso = 12        (nS)
+    maxcurrent = 500 : maximum allowed total current
+    label = 0 : assign an arbitrary label to the cell
 
 }
 
@@ -127,6 +128,9 @@ DERIVATIVE states {
 
     														:iNOISE = - (x2-x1) * ( vv - erev )
     iTotal=-ww+iEXT+iAMPA+iGABA+iNMDA  						:+iNOISE
+    if (iTotal>maxcurrent) {
+        iTotal = maxcurrent
+    }
     
     :if (vv > V_thre) {
     :  V_thre = vv+1.0
