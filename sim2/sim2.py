@@ -19,15 +19,15 @@ pl.seed(205738) # Reproducible results (hopefully)
 
 sc.tic()
 
-scale = 1
-duration = 2000 # Set the duration in ms
+scale = 3
+duration = 5000 # Set the duration in ms
 n_e = 80*scale # Number of excitatory cells
 n_i = 20*scale # Number of inhibitory cells
 ncells = n_e + n_i # Number of cells
 
 globalconnweight = 1.0 # Global modulation for all weights (both connectivity and noise)
-connweights = {'e->e': [1.0, 1.0], # Set the connectivity weights for each synapse type, 2nd is for AMPA
-               'e->i': [1.0, 1.0], 
+connweights = {'e->e': [1.0, 3.0], # Set the connectivity weights for each synapse type, 2nd is for AMPA
+               'e->i': [1.0, 3.0], 
                'i->e': [-15.0, 0.0], 
                'i->i': [-15.0, 0.0]} 
 noiseweights = 0.5*pl.array([1.0, 1.0]) # Set the noise stimulation weights for each synapse
@@ -52,7 +52,6 @@ for c in range(ncells):
         thiscell.a = 2
         thiscell.G_l = 12
         thiscell.tau_w = 300
-        thiscell.V_reset = -58
     else:     
         thiscell.label = 2 # inhibitory
         thiscell.a = 2
@@ -60,7 +59,6 @@ for c in range(ncells):
         thiscell.C = 200
         thiscell.G_l = 10
         thiscell.tau_w = 30
-        thiscell.V_reset = -58
         
     cells.append(thiscell)
     spikevecs.append(h.Vector())
