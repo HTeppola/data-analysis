@@ -19,8 +19,8 @@ pl.seed(205738) # Reproducible results (hopefully)
 
 sc.tic()
 
-scale = 3
-duration = 5000 # Set the duration in ms
+scale =1
+duration = 1000 # Set the duration in ms
 n_e = 80*scale # Number of excitatory cells
 n_i = 20*scale # Number of inhibitory cells
 ncells = n_e + n_i # Number of cells
@@ -30,9 +30,10 @@ connweights = {'e->e': [1.0, 3.0], # Set the connectivity weights for each synap
                'e->i': [1.0, 3.0], 
                'i->e': [-15.0, 0.0], 
                'i->i': [-15.0, 0.0]} 
-noiseweights = 0.5*pl.array([1.0, 1.0]) # Set the noise stimulation weights for each synapse
+noiseweights = [8.0, 1.0] # Set the noise stimulation weights for each synapse
+#noiseweights = 0.5*pl.array([8.0, 1.0]) # Set the noise stimulation weights for each synapse
 noiserate = 100 # Rate of stimulation, in Hz
-connprob = 0.2 # The connection probability
+connprob = 0.5 # The connection probability
 conndelay = 40 # Average connection delay (ms)
 whichcell = 0 # The cell to record example traces from (shouldn't matter)
 whichsyns = [0,1] # Which synapses/receptors to stimulate
@@ -52,6 +53,8 @@ for c in range(ncells):
         thiscell.a = 2
         thiscell.G_l = 12
         thiscell.tau_w = 300
+        thiscell.mNMDA = 0
+        #thiscell.mAMPA = 0
     else:     
         thiscell.label = 2 # inhibitory
         thiscell.a = 2
@@ -59,6 +62,8 @@ for c in range(ncells):
         thiscell.C = 200
         thiscell.G_l = 10
         thiscell.tau_w = 30
+        thiscell.mNMDA = 0
+        #thiscell.mAMPA = 0
         
     cells.append(thiscell)
     spikevecs.append(h.Vector())
