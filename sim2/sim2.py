@@ -50,10 +50,8 @@ for c in range(ncells):
     if c<n_e: 
         thiscell.label = 1 # excitatory -- arbitrary convention
         thiscell.a = 2
-        thiscell.b = 60
-        thiscell.C = 281
         thiscell.G_l = 12
-        thiscell.tau_w = 30
+        thiscell.tau_w = 300
         thiscell.V_reset = -58
     else:     
         thiscell.label = 2 # inhibitory
