@@ -49,9 +49,21 @@ for c in range(ncells):
     thiscell = createcell(dummy)
     if c<n_e: 
         thiscell.label = 1 # excitatory -- arbitrary convention
-        thiscell.V_thre = -40
+        thiscell.a = 2
+        thiscell.b = 60
+        thiscell.C = 281
+        thiscell.G_l = 12
+        thiscell.tau_w = 30
+        thiscell.V_reset = -58
     else:     
         thiscell.label = 2 # inhibitory
+        thiscell.a = 2
+        thiscell.b = 0
+        thiscell.C = 200
+        thiscell.G_l = 10
+        thiscell.tau_w = 30
+        thiscell.V_reset = -58
+        
     cells.append(thiscell)
     spikevecs.append(h.Vector())
     spikerecorders.append(h.NetCon(cells[c], None))
@@ -175,7 +187,7 @@ for c in range(ncells):
             spikecolor = 'red' # excitatory -- arbitrary convention
         else:
             spikecolor = 'blue' # inhibitory
-        ax.scatter(ex, why, c=spikecolor, alpha=1.0)
+        pl.scatter(ex, why, c=spikecolor, alpha=1.0)
         pl.show()
     else:
         print('No spikes for cell %i' % c)
