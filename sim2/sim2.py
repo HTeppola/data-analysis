@@ -15,25 +15,25 @@ import sciris as sc
 integrator = h.CVode()
 integrator.active(1)
 integrator.use_local_dt(1)
-pl.seed(648647) # Reproducible results (hopefully)
+pl.seed(205738) # Reproducible results (hopefully)
 
 sc.tic()
 
 scale =1
-duration = 1000 # Set the duration in ms
+duration = 10000 # Set the duration in ms
 n_e = 80*scale # Number of excitatory cells
 n_i = 20*scale # Number of inhibitory cells
 ncells = n_e + n_i # Number of cells
 
 globalconnweight = 1.2 # Global modulation for all weights (both connectivity and noise)
-connweights = {'e->e': [1.0, 3.0], # Set the connecivity weights for each synapse type, 2nd is for AMPA
-               'e->i': [1.0, 3.0], 
-               'i->e': [-15.0, 0.0], 
-               'i->i': [-15.0, 0.0]} 
-noiseweights = [8.0, 1.0] # Set the noise stimulation weights for each synapse
-#noiseweights = 0.5*pl.array([8.0, 1.0]) # Set the noise stimulation weights for each synapse
+connweights = {'e->e': [3.0, 5.0], # Set the connecivity weights for each synapse type, 2nd is for AMPA
+               'e->i': [3.0, 5.0], 
+               'i->e': [-85.0, 0], 
+               'i->i': [-85.0, 0]} 
+#noiseweights = [8.0, 1.0] # Set the noise stimulation weights for each synapse
+noiseweights = 0.5*pl.array([8.0, 1.0]) # Set the noise stimulation weights for each synapse
 noiserate = 100 # Rate of stimulation, in Hz
-connprob = 0.5 # The connection probability
+connprob = 0.2 # The connection probability
 conndelay = 40 # Average connection delay (ms)
 whichcell = 0 # The cell to record example traces from (shouldn't matter)
 whichsyns = [0,1] # Which synapses/receptors to stimulate
@@ -53,8 +53,9 @@ for c in range(ncells):
         thiscell.a = 2
         thiscell.G_l = 12
         thiscell.tau_w = 300
-        thiscell.mNMDA = 0
-        #thiscell.mAMPA = 0
+        thiscell.mNMDA = 0.2
+        #thiscell.mAMPA = 0.001
+        thiscell.maxcurrent = 6000
     else:     
         thiscell.label = 2 # inhibitory
         thiscell.a = 2
@@ -62,9 +63,9 @@ for c in range(ncells):
         thiscell.C = 200
         thiscell.G_l = 10
         thiscell.tau_w = 30
-        thiscell.mNMDA = 0
-        #thiscell.mAMPA = 0
-        
+        thiscell.mNMDA = 0.2
+        #thiscell.mAMPA = 0.001
+        thiscell.maxcurrent = 6000
     cells.append(thiscell)
     spikevecs.append(h.Vector())
     spikerecorders.append(h.NetCon(cells[c], None))
@@ -179,7 +180,11 @@ pl.ylabel('gGABA(nS)')
 
 
 fig = pl.figure()
-ax = fig.add_subplot()
+#pl.subplot(2,1,1)
+#pl.plot(pl.array(tvec), pl.array())
+#pl.xlabel('Time(ms)')
+#pl.ylabel('GFR(Hz)')
+#ax = fig.add_subplot()
 for c in range(ncells): 
     ex = pl.array(spikevecs[c])
     if len(ex)>0:
@@ -188,7 +193,7 @@ for c in range(ncells):
             spikecolor = 'red' # excitatory -- arbitrary convention
         else:
             spikecolor = 'blue' # inhibitory
-        ax.scatter(ex, why, c=spikecolor, alpha=1.0)
+        pl.scatter(ex, why, c=spikecolor, alpha=1.0)
     else:
         print('No spikes for cell %i' % c)
 pl.xlabel('Time (ms)')
