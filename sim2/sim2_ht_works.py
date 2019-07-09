@@ -54,7 +54,7 @@ for c in range(ncells):
         thiscell.G_l = 12
         thiscell.tau_w = 300
         thiscell.mNMDA = 0.2
-        thiscell.mAMPA = 0
+        #thiscell.mAMPA = 0
         thiscell.maxcurrent = 6000
     else:     
         thiscell.label = 2 # inhibitory
@@ -64,7 +64,7 @@ for c in range(ncells):
         thiscell.G_l = 10
         thiscell.tau_w = 30
         thiscell.mNMDA = 0.2
-        thiscell.mAMPA = 0
+        #thiscell.mAMPA = 0
         thiscell.maxcurrent = 6000
     cells.append(thiscell)
     spikevecs.append(h.Vector())
@@ -128,8 +128,6 @@ gg = h.Vector()
 tvec.record(h._ref_t)
 vvec.record(cells[whichcell]._ref_vv)
 wvec.record(cells[whichcell]._ref_ww)
-#ivec.record(cells[whichcell]._ref_gEXC)
-#iivec.record(cells[whichcell].ref_gINH)
 ga.record(cells[whichcell]._ref_gAMPA)
 gn.record(cells[whichcell]._ref_gNMDA)
 gg.record(cells[whichcell]._ref_gGABA)
@@ -153,16 +151,6 @@ pl.plot(pl.array(tvec), pl.array(wvec))
 pl.xlabel('Time(ms)')
 pl.ylabel('I(pA)')
 
-#pl.subplot(7,1,3)
-#pl.plot(pl.array(tvec), pl.array(ivec))
-#pl.xlabel('Time(ms)')
-#pl.ylabel('gExc(nS)')
-
-#pl.subplot(7,1,4)
-#pl.plot(pl.array(tvec), pl.array(iivec))
-#pl.xlabel('Time(ms)')
-#pl.ylabel('gINH(nS)')
-
 pl.subplot(6,1,4)
 pl.plot(pl.array(tvec), pl.array(ga))
 pl.xlabel('Time(ms)')
@@ -180,11 +168,28 @@ pl.ylabel('gGABA(nS)')
 
 
 fig = pl.figure()
-#pl.subplot(2,1,1)
-#pl.plot(pl.array(tvec), pl.array())
-#pl.xlabel('Time(ms)')
-#pl.ylabel('GFR(Hz)')
+
+spx = []
+for c in range(ncells):
+    spx.extend(spikevecs[c])
+    
+pl.subplot(2,1,1)
+
+#binsize= duration/20
+pl.hist(spx, bins=500)
+
+pl.ylabel('GFR(Hz)')
+spikespercell = [len(pl.array(spikevecs[c])) for c in range(ncells)]
+firingrate = sum(spikespercell)/ncells/duration*1000
+pl.title('cells=%i syns/cell=%i noise=%s rate=%0.1f Hz' % (ncells,len(connections)/ncells,noiseweights,firingrate),fontsize=12)
+
+## Set a clean upper y-axis limit.
+#pl.ylim(ymax=np.ceil(maxfreq / 10) * 10 if maxfreq % 10 else maxfreq + 10)
+
+
 #ax = fig.add_subplot()
+
+pl.subplot(2,1,2)
 for c in range(ncells): 
     ex = pl.array(spikevecs[c])
     if len(ex)>0:
@@ -199,11 +204,9 @@ for c in range(ncells):
 pl.xlabel('Time (ms)')
 pl.ylabel('Cell ID')
 pl.xlim(tvec[0], tvec[-1])
-spikespercell = [len(pl.array(spikevecs[c])) for c in range(ncells)]
-firingrate = sum(spikespercell)/ncells/duration*1000
-pl.title('cells=%i syns/cell=%i noise=%s rate=%0.1f Hz' % (ncells,len(connections)/ncells,noiseweights,firingrate),fontsize=12)
 pl.show()
 sc.toc(); pl.pause(0.1)
+
 
 
 print('Done.')
