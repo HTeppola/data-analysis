@@ -25,7 +25,7 @@ n_e = 80*scale # Number of excitatory cells
 n_i = 20*scale # Number of inhibitory cells
 ncells = n_e + n_i # Number of cells
 
-globalconnweight = 1.2 # Global modulation for all weights (both connectivity and noise)
+globalconnweight = 1.15 # Global modulation for all weights (both connectivity and noise)
 connweights = {'e->e': [3.0, 5.0], # Set the connecivity weights for each synapse type, 2nd is for AMPA
                'e->i': [3.0, 5.0], 
                'i->e': [-85.0, 0], 
@@ -237,10 +237,11 @@ for burst_index in range(len(indices_start)):
         
     
 pl.subplot(2,1,1)
-
-#binsize= duration/20
-pl.hist(spx, bins=500)
-
+binsize = 20
+nbins = int(duration/binsize)
+counts, binedges = pl.histogram(spx, bins=nbins)
+gfr = pl.array(counts*1000/binsize/ncells, dtype=float)
+pl.bar(binedges[:-1], gfr, width=binsize)
 pl.ylabel('GFR(Hz)')
 spikespercell = [len(pl.array(spikevecs[c])) for c in range(ncells)]
 firingrate = sum(spikespercell)/ncells/duration*1000
