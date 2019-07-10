@@ -25,7 +25,7 @@ n_e = 80*scale # Number of excitatory cells
 n_i = 20*scale # Number of inhibitory cells
 ncells = n_e + n_i # Number of cells
 
-globalconnweight = 1.15 # Global modulation for all weights (both connectivity and noise)
+globalconnweight = 1.2 # Global modulation for all weights (both connectivity and noise)
 connweights = {'e->e': [3.0, 5.0], # Set the connecivity weights for each synapse type, 2nd is for AMPA
                'e->i': [3.0, 5.0], 
                'i->e': [-85.0, 0], 
@@ -55,7 +55,7 @@ for c in range(ncells):
         thiscell.tau_w = 300
         thiscell.mNMDA = 0.2
         #thiscell.mAMPA = 0
-        thiscell.maxcurrent = 3000
+        thiscell.maxcurrent = 6000
     else:     
         thiscell.label = 2 # inhibitory
         thiscell.a = 2
@@ -65,7 +65,7 @@ for c in range(ncells):
         thiscell.tau_w = 30
         thiscell.mNMDA = 0.2
         #thiscell.mAMPA = 0
-        thiscell.maxcurrent = 3000
+        thiscell.maxcurrent = 6000
     cells.append(thiscell)
     spikevecs.append(h.Vector())
     spikerecorders.append(h.NetCon(cells[c], None))
