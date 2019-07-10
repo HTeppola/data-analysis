@@ -20,7 +20,7 @@ pl.seed(205738) # Reproducible results (hopefully)
 sc.tic()
 
 scale = 1
-duration = 2000 # Set the duration in ms
+duration = 10000 # Set the duration in ms
 n_e = 80*scale # Number of excitatory cells
 n_i = 20*scale # Number of inhibitory cells
 ncells = n_e + n_i # Number of cells
@@ -31,8 +31,8 @@ connweights = {'e->e': [3.0, 5.0], # Set the connecivity weights for each synaps
                'i->e': [-85.0, 0], 
                'i->i': [-85.0, 0]} 
 #noiseweights = [8.0, 1.0] # Set the noise stimulation weights for each synapse
-noiseweights = 0.5*pl.array([8.0, 1.0]) # Set the noise stimulation weights for each synapse
-noiserate = 100 # Rate of stimulation, in Hz
+noiseweights = 1.0*pl.array([8.0, 1.0]) # Set the noise stimulation weights for each synapse
+noiserate = 10 # Rate of stimulation, in Hz
 connprob = 0.2 # The connection probability
 conndelay = 40 # Average connection delay (ms)
 whichcell = 0 # The cell to record example traces from (shouldn't matter)
